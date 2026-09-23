@@ -1,59 +1,39 @@
 import React from 'react';
-import {
-  BookOpen, Briefcase, Code, ExternalLink, FileSearch, MousePointer, Network, Newspaper,
-  Presentation, Scale, Search, SpellCheck, Users, Video, Wrench,
-} from 'lucide-react';
-import type { Tool } from '../types';
+import { ExternalLink } from 'lucide-react';
+import type { Status, Tool } from '../types';
 import { Badge } from './Ui';
 import { shortUrl } from '../lib/util';
 
-const ICONS: Record<string, React.FC<{ className?: string }>> = {
-  'book-open': BookOpen,
-  briefcase: Briefcase,
-  code: Code,
-  'file-search': FileSearch,
-  'mouse-pointer': MousePointer,
-  network: Network,
-  newspaper: Newspaper,
-  presentation: Presentation,
-  scale: Scale,
-  search: Search,
-  'spell-check': SpellCheck,
-  users: Users,
-  video: Video,
-};
-
-export const ToolCard: React.FC<{ tool: Tool }> = ({ tool }) => {
-  const Icon = ICONS[tool.icon] ?? Wrench;
-  return (
+/** 목록 한 줄. 넓은 화면에서는 이름·설명 | 상태 | 주소 세 칸, 휴대폰에서는 위아래로 쌓인다. */
+export const ToolRow: React.FC<{ tool: Tool; status?: Status }> = ({ tool, status }) => (
+  <li>
     <a
       href={tool.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="group flex flex-col h-full min-w-0 bg-white rounded-lg border border-slate-200 p-5
-                 hover:border-blue-600 transition-colors"
+      className="group grid gap-x-6 gap-y-1.5 px-4 sm:px-5 py-3.5 min-w-0
+                 sm:grid-cols-[minmax(0,1fr)_6.5rem_15rem] sm:items-center
+                 hover:bg-slate-50 transition-colors"
     >
-      <div className="flex items-start justify-between gap-3">
-        <span className="w-10 h-10 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center shrink-0
-                         group-hover:bg-blue-600 group-hover:text-white transition-colors">
-          <Icon className="w-5 h-5" aria-hidden="true" />
+      <span className="min-w-0">
+        <span className="flex items-center gap-2 flex-wrap">
+          <span className="font-bold text-slate-900 group-hover:text-blue-700 group-hover:underline underline-offset-4">
+            {tool.name}
+          </span>
+          {tool.badge && <Badge tone={tool.badge.tone}>{tool.badge.label}</Badge>}
         </span>
-        {tool.badge && <Badge tone={tool.badge.tone}>{tool.badge.label}</Badge>}
-      </div>
+        <span className="block mt-0.5 text-sm text-slate-600">{tool.desc}</span>
+      </span>
 
-      <h3 className="mt-4 text-base font-bold text-slate-900 group-hover:text-blue-700 transition-colors">
-        {tool.name}
-      </h3>
-      <p className="mt-1.5 text-sm text-slate-600 leading-relaxed flex-1">{tool.desc}</p>
+      <span className="flex sm:justify-center">
+        {status && <Badge tone={status.tone}>{status.label}</Badge>}
+      </span>
 
-      <p className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2 text-xs text-slate-500">
-        <span className="truncate min-w-0">{shortUrl(tool.url)}</span>
-        <span className="inline-flex items-center gap-1 font-bold text-slate-700 group-hover:text-blue-700 shrink-0">
-          열기
-          <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
-          <span className="sr-only">(새 창)</span>
-        </span>
-      </p>
+      <span className="flex items-center gap-1.5 min-w-0 text-xs text-slate-500 group-hover:text-blue-700">
+        <span className="truncate">{shortUrl(tool.url)}</span>
+        <ExternalLink className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+        <span className="sr-only">(새 창)</span>
+      </span>
     </a>
-  );
-};
+  </li>
+);

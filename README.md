@@ -11,7 +11,7 @@
 
 - `categories` — 분류(동향·모니터링 / 점검·작성 / 안내·교육)
 - `tools` — 도구 한 줄에 하나. `category`는 분류 `id`와 일치
-- `icon` — `src/components/ToolCard.tsx` 의 `ICONS` 목록 이름. 없으면 공구 아이콘
+- `status` — 운영 단계. `statuses` 의 `id`(live·pilot·prep·stopped)와 일치
 - `badge` — 선택. `{ "label": "내부 참고", "tone": "amber" }` (tone: blue·slate·amber·green·red)
 - `updated` — 목록 기준일. 고칠 때마다 날짜 갱신
 

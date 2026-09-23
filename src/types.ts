@@ -1,5 +1,12 @@
 export type Tone = 'blue' | 'slate' | 'amber' | 'green' | 'red';
 
+export interface Status {
+  id: string;
+  label: string;
+  tone: Tone;
+  desc: string;
+}
+
 export interface Category {
   id: string;
   label: string;
@@ -9,7 +16,7 @@ export interface Category {
 export interface Tool {
   id: string;
   category: string;
-  icon: string;
+  status: string;
   name: string;
   desc: string;
   url: string;
@@ -18,6 +25,7 @@ export interface Tool {
 
 export interface Catalog {
   updated: string;
+  statuses: Status[];
   categories: Category[];
   tools: Tool[];
 }
