@@ -14,7 +14,7 @@ const ICONS: Record<string, React.FC<{ className?: string }>> = {
   users: Users, video: Video,
 };
 
-/** 카드 안의 한 줄. 아이콘 | 이름·단계·설명·주소 | 열기 */
+/** 카드 안의 한 줄. 아이콘 | 이름·설명·주소 | 단계 | 열기 */
 export const ToolRow: React.FC<{ tool: Tool; status?: Status }> = ({ tool, status }) => {
   const Icon = ICONS[tool.icon] ?? Wrench;
   return (
@@ -35,12 +35,17 @@ export const ToolRow: React.FC<{ tool: Tool; status?: Status }> = ({ tool, statu
             <span className="text-base font-bold text-slate-900 group-hover:text-blue-700 transition-colors">
               {tool.name}
             </span>
-            {status && <Badge tone={status.tone}>{status.label}</Badge>}
             {tool.badge && <Badge tone={tool.badge.tone}>{tool.badge.label}</Badge>}
           </span>
           <span className="block mt-0.5 text-sm text-slate-600">{tool.desc}</span>
           <span className="block mt-1 text-xs text-slate-400 truncate">{shortUrl(tool.url)}</span>
         </span>
+
+        {status && (
+          <span className="shrink-0">
+            <Badge tone={status.tone}>{status.label}</Badge>
+          </span>
+        )}
 
         <span className="inline-flex items-center gap-1 text-sm font-bold text-slate-700 group-hover:text-blue-700 shrink-0">
           <span className="hidden sm:inline">열기</span>

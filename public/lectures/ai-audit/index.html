@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>AI를 활용한 감사보고서 작성 및 감사 활용 프로그램</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"/>
+<style>
+:root{
+  --bgd:#0A0E16; --navy:#121C31; --navy2:#1E2C49;
+  --gold:#E8B85C; --gold2:#F5DCA8; --bronze:#8E6209;
+  --ink:#141A24; --ink-d:#EDF1F8;
+  --dim:#8A99B4; --dim2:#5B6980;
+  --slate:#5A6A88; --slate2:#93A0B6;
+  --line:#E3E7EE; --paper:#F7F8FA;
+  --red:#B5372A; --red-lt:#E8907F; --ok:#1F6B4D;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%;background:#05070C}
+body{font-family:"Pretendard","Pretendard Variable","Noto Sans KR","Malgun Gothic",Arial,sans-serif;
+  color:var(--ink);overflow:hidden;-webkit-font-smoothing:antialiased}
+#stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#canvas{position:relative;width:1440px;height:810px;transform-origin:center center;flex:0 0 auto;
+  overflow:hidden;background:var(--bgd)}
+
+/* ========== 슬라이드 전환 ========== */
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;
+  padding:92px 104px 100px;background:#fff;overflow:hidden;
+  opacity:0;visibility:hidden;transform:scale(1.014);filter:blur(4px);
+  transition:opacity .5s cubic-bezier(.22,.61,.36,1),transform .66s cubic-bezier(.22,.61,.36,1),
+             filter .5s,visibility 0s .62s}
+.slide.active{opacity:1;visibility:visible;transform:none;filter:blur(0);z-index:3;
+  transition:opacity .55s cubic-bezier(.22,.61,.36,1),transform .66s cubic-bezier(.16,1,.3,1),
+             filter .5s,visibility 0s}
+.slide.exiting{opacity:0;visibility:visible;transform:scale(.99) translateX(-3%);filter:blur(3px);z-index:2;
+  transition:opacity .46s,transform .62s cubic-bezier(.22,.61,.36,1),filter .46s,visibility 0s .62s}
+.slide .note{display:none}
+
+/* 요소 순차 등장 */
+.slide [data-anim]{opacity:0;transform:translateY(20px);
+  transition:opacity .6s cubic-bezier(.2,.7,.2,1),transform .6s cubic-bezier(.2,.7,.2,1)}
+.slide [data-anim].in{opacity:1;transform:none}
+
+/* ========== 배경 ========== */
+.slide.dark{background:var(--bgd);color:var(--ink-d)}
+.slide.dark:before{content:"";position:absolute;inset:0;z-index:0;
+  background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);
+  background-size:58px 58px;
+  -webkit-mask-image:radial-gradient(ellipse 78% 64% at 50% 40%,#000 32%,transparent 100%);
+  mask-image:radial-gradient(ellipse 78% 64% at 50% 40%,#000 32%,transparent 100%)}
+.slide.dark:after{content:"";position:absolute;left:50%;top:-18%;width:1150px;height:660px;
+  transform:translateX(-50%);z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse at center,rgba(232,184,92,.15),transparent 66%)}
+.slide.paper{background:var(--paper)}
+.slide.paper:before,.slide:not(.dark):before{content:"";position:absolute;inset:0;z-index:0;
+  background-image:linear-gradient(rgba(18,28,49,.028) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(18,28,49,.028) 1px,transparent 1px);
+  background-size:58px 58px;
+  -webkit-mask-image:radial-gradient(ellipse 76% 62% at 50% 40%,#000 28%,transparent 100%);
+  mask-image:radial-gradient(ellipse 76% 62% at 50% 40%,#000 28%,transparent 100%)}
+.slide>*{position:relative;z-index:2}
+
+/* ========== 장식 ========== */
+.bar{position:absolute;left:0;top:0;height:3px;z-index:6;
+  background:linear-gradient(90deg,var(--gold),rgba(232,184,92,.05))}
+.slide:not(.dark) .bar{background:linear-gradient(90deg,var(--bronze),rgba(142,98,9,.06))}
+.dots{position:absolute;left:36px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;
+  gap:11px;z-index:6}
+.dots i{width:7px;height:7px;border-radius:50%;background:#2B3547;display:block}
+.slide:not(.dark) .dots i{background:#D3D9E2}
+.dots i.on{background:var(--gold);box-shadow:0 0 12px rgba(232,184,92,.85);animation:pulse 2.4s ease-in-out infinite}
+.slide:not(.dark) .dots i.on{background:var(--bronze);box-shadow:0 0 10px rgba(142,98,9,.5)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+
+.foot{position:absolute;left:104px;bottom:40px;font-size:13px;letter-spacing:.1em;color:var(--slate2);z-index:6}
+.dark .foot{color:var(--dim2)}
+.pg{position:absolute;right:104px;bottom:40px;font-size:13px;font-weight:800;color:var(--slate2);z-index:6}
+.dark .pg{color:var(--dim2)}
+.src{position:absolute;left:104px;right:104px;bottom:66px;font-size:13px;color:var(--slate2);z-index:6;line-height:1.45}
+.dark .src{color:var(--dim2)}
+.demo{position:absolute;right:104px;top:64px;background:var(--red);color:#fff;font-size:15px;font-weight:800;
+  padding:8px 16px;border-radius:5px;letter-spacing:.06em;z-index:6}
+.dark .demo{background:var(--gold);color:#1A1205}
+
+/* ========== 타이포 ========== */
+.tag{display:flex;align-items:center;gap:11px;font-size:15px;letter-spacing:.24em;font-weight:800;
+  color:var(--bronze);margin-bottom:32px}
+.tag:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--bronze);flex:0 0 auto}
+.dark .tag{color:var(--gold)}
+.dark .tag:before{background:var(--gold);box-shadow:0 0 10px rgba(232,184,92,.8)}
+h1{font-size:92px;line-height:1.1;margin:0;font-weight:900;letter-spacing:-.05em;color:var(--navy)}
+h1.sm{font-size:70px;letter-spacing:-.045em}
+h1.xs{font-size:50px;letter-spacing:-.035em;line-height:1.2}
+.dark h1{color:#fff}
+.sub{font-size:26px;color:var(--slate);margin-top:34px;line-height:1.55;font-weight:500;max-width:1140px}
+.dark .sub{color:var(--dim)}
+.sub.tight{margin-top:24px}
+.sub b{color:var(--navy);font-weight:800}
+.dark .sub b{color:#fff}
+.em{color:var(--red);font-weight:800}
+.dark .em{color:var(--gold2)}
+.rule{width:180px;height:1px;margin:32px 0 0;background:linear-gradient(90deg,var(--bronze),transparent)}
+.dark .rule{background:linear-gradient(90deg,var(--gold),transparent)}
+.strike{color:#9AA5B8;text-decoration:line-through;text-decoration-color:var(--red);text-decoration-thickness:5px}
+.dark .strike{color:#4E5B72;text-decoration-color:#C4553F}
+
+/* ========== 큰 숫자 ========== */
+.nums{display:flex;align-items:flex-end;gap:78px}
+.huge{font-size:230px;font-weight:900;letter-spacing:-.07em;line-height:.86;font-variant-numeric:tabular-nums;
+  color:var(--red)}
+.huge.n{color:var(--navy)}
+.huge.w{font-size:168px}
+.dark .huge{background:linear-gradient(180deg,#fff 10%,var(--gold) 96%);-webkit-background-clip:text;
+  background-clip:text;color:transparent}
+.dark .huge.n{background:linear-gradient(180deg,#fff 30%,#AFC0DC 100%);-webkit-background-clip:text;
+  background-clip:text;color:transparent}
+.unit{font-size:50px;font-weight:800;color:var(--slate);margin-left:12px;letter-spacing:-.02em}
+.dark .unit{color:var(--dim)}
+.cap{font-size:19px;color:var(--slate2);margin:16px 0 0;font-weight:500;letter-spacing:.03em}
+.dark .cap{color:var(--dim2)}
+
+/* ========== 칩 ========== */
+.chips{display:flex;gap:15px;margin-top:36px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);border-radius:9px;padding:15px 22px;font-size:20px;color:var(--slate);
+  background:rgba(18,28,49,.02)}
+.chip b{color:var(--navy);font-weight:800}
+.chip .x{color:var(--red);font-weight:800;margin-left:10px}
+.dark .chip{border-color:#2E3A4F;color:var(--dim);background:rgba(255,255,255,.025)}
+.dark .chip b{color:#fff}
+.dark .chip .x{color:#E0805F}
+
+/* ========== 기준↔실제 ========== */
+.eq{display:flex;align-items:center;gap:36px;margin-top:8px}
+.eq .box{flex:1;border:3px solid var(--navy);border-radius:12px;padding:32px 28px;text-align:center}
+.dark .eq .box{border-color:#41567C}
+.eq .box b{display:block;font-size:44px;font-weight:900;color:var(--navy);letter-spacing:-.03em}
+.dark .eq .box b{color:#fff}
+.eq .box span{display:block;font-size:19px;color:var(--slate);margin-top:8px}
+.dark .eq .box span{color:var(--dim)}
+.eq .op{font-size:62px;font-weight:900;color:var(--red)}
+.dark .eq .op{color:var(--gold)}
+
+/* ========== 랭킹 / 목록 ========== */
+.rank{margin-top:10px}
+.rank div{display:flex;align-items:center;gap:24px;padding:16px 0;border-bottom:1px solid var(--line)}
+.dark .rank div{border-bottom-color:#243149}
+.rank i{font-style:normal;font-size:19px;font-weight:900;color:var(--slate2);min-width:32px}
+.rank b{font-size:31px;font-weight:800;color:var(--navy);letter-spacing:-.025em;flex:1}
+.dark .rank b{color:#fff}
+.rank u{text-decoration:none;font-size:31px;font-weight:900;color:var(--red);font-variant-numeric:tabular-nums}
+.dark .rank u{color:var(--gold)}
+.rank s{text-decoration:none;font-size:18px;color:var(--slate2);min-width:100px;text-align:right}
+.dark .rank s{color:var(--dim2)}
+
+.li5{margin-top:18px}
+.li5 div{display:flex;gap:20px;align-items:baseline;padding:15px 0;border-bottom:1px solid var(--line)}
+.dark .li5 div{border-bottom-color:#243149}
+.li5 i{font-style:normal;font-size:17px;font-weight:900;color:var(--bronze);min-width:30px}
+.dark .li5 i{color:var(--gold)}
+.li5 b{font-size:28px;font-weight:800;color:var(--navy);letter-spacing:-.02em}
+.dark .li5 b{color:#fff}
+.li5 span{font-size:20px;color:var(--slate);margin-left:auto;text-align:right}
+.dark .li5 span{color:var(--dim)}
+
+/* ========== 2열 ========== */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:10px}
+.two>div{border-radius:12px;padding:30px 32px;border:2px solid var(--line)}
+.two .no{background:#FCF0EE;border-color:#EBCFC9}
+.two .yes{background:#EDF5F1;border-color:#C9E0D4}
+.two .pl{background:var(--paper)}
+.dark .two>div{border-color:#2B3A55;background:rgba(255,255,255,.028)}
+.dark .two .no{background:rgba(180,60,40,.12);border-color:#5A3330}
+.dark .two .yes{background:rgba(40,140,100,.1);border-color:#28503F}
+.two h4{margin:0 0 16px;font-size:26px;font-weight:900;letter-spacing:-.025em}
+.two .no h4{color:var(--red)} .two .yes h4{color:var(--ok)} .two .pl h4{color:var(--navy)}
+.dark .two h4{color:var(--gold)}
+.dark .two .no h4{color:#E8907F} .dark .two .yes h4{color:#7FD3AC}
+.two ul{margin:0;padding-left:20px}
+.two li{font-size:21px;line-height:1.45;margin-bottom:11px;color:var(--ink)}
+.dark .two li{color:#C9D4E6}
+.two p{margin:0;font-size:21px;line-height:1.5;color:var(--ink)}
+.dark .two p{color:#C9D4E6}
+
+/* ========== 3~4칸 ========== */
+.cols{display:grid;gap:24px;margin-top:14px}
+.c3{grid-template-columns:repeat(3,1fr)} .c4{grid-template-columns:repeat(4,1fr)}
+.cols .k{border-top:4px solid var(--navy);padding-top:20px}
+.cols .k.acc{border-top-color:var(--red)}
+.dark .cols .k{border-top-color:#41567C}
+.dark .cols .k.acc{border-top-color:var(--gold)}
+.cols .k b{display:block;font-size:27px;font-weight:900;color:var(--navy);letter-spacing:-.025em;margin-bottom:10px}
+.dark .cols .k b{color:#fff}
+.cols .k.acc b{color:var(--red)}
+.dark .cols .k.acc b{color:var(--gold2)}
+.cols .k span{font-size:19px;color:var(--slate);line-height:1.45;display:block}
+.dark .cols .k span{color:var(--dim)}
+
+/* ========== 단계 ========== */
+.steps{display:flex;gap:0;margin-top:24px}
+.steps>div{flex:1;position:relative;padding:0 26px 0 0}
+.steps>div:not(:last-child):after{content:"";position:absolute;right:11px;top:26px;
+  border-left:11px solid #41567C;border-top:8px solid transparent;border-bottom:8px solid transparent}
+.steps i{font-style:normal;display:flex;width:46px;height:46px;border-radius:50%;background:var(--navy);
+  color:#fff;font-size:21px;font-weight:900;align-items:center;justify-content:center;margin-bottom:14px}
+.dark .steps i{background:var(--gold);color:#1A1205}
+.steps b{display:block;font-size:24px;font-weight:900;color:var(--navy);letter-spacing:-.02em;margin-bottom:7px}
+.dark .steps b{color:#fff}
+.steps span{font-size:18px;color:var(--slate);line-height:1.4}
+.dark .steps span{color:var(--dim)}
+
+/* ========== 코드 ========== */
+.code{background:#0D1320;border:1px solid #232F45;border-radius:12px;padding:28px 32px;margin-top:14px;position:relative}
+.dark .code{background:rgba(255,255,255,.035);border-color:#2C3A53}
+.code pre{margin:0;font-family:"D2Coding","Consolas","Malgun Gothic",monospace;font-size:21px;
+  line-height:1.72;color:#D7DEEA;white-space:pre-wrap}
+.code .k{color:var(--gold)} .code .b{color:#7FB5E8}
+.copy{position:absolute;right:18px;top:18px;background:#2B3A58;color:#C9D5E8;border:0;border-radius:6px;
+  padding:7px 15px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+.copy:hover{background:#3A4E74}
+.mono{font-family:"D2Coding","Consolas","Malgun Gothic",monospace;font-size:22px;line-height:1.8;white-space:pre-wrap}
+
+/* ========== 표지 ========== */
+.meta{display:flex;gap:54px;margin-top:48px;padding-top:30px;border-top:1px solid #253350}
+.meta div span{display:block;font-size:13px;letter-spacing:.16em;color:var(--dim2);margin-bottom:7px}
+.meta div b{font-size:21px;color:#E7ECF4;font-weight:700}
+.secnum{font-size:160px;font-weight:900;line-height:.88;letter-spacing:-.07em;margin-bottom:16px;
+  background:linear-gradient(180deg,#3A4E78 5%,#1A2540 95%);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+
+/* ========== 빌드 (클릭 단계 공개) ========== */
+.build{opacity:0;transform:translateY(16px);pointer-events:none;
+  transition:opacity .5s cubic-bezier(.2,.7,.2,1),transform .5s cubic-bezier(.2,.7,.2,1)}
+.build.in{opacity:1;transform:none;pointer-events:auto}
+.builds{position:absolute;right:104px;bottom:41px;display:flex;gap:6px;z-index:6}
+.builds i{width:7px;height:7px;border-radius:50%;background:rgba(18,28,49,.14);display:block;
+  transition:background .3s,box-shadow .3s}
+.dark .builds i{background:rgba(255,255,255,.13)}
+.builds i.on{background:var(--bronze);box-shadow:0 0 8px rgba(142,98,9,.55)}
+.dark .builds i.on{background:var(--gold);box-shadow:0 0 8px rgba(232,184,92,.7)}
+.pg{right:104px;bottom:66px}
+
+/* ========== 흐르는 선 ========== */
+.flowline{height:2px;margin:26px 0 4px;position:relative;
+  background:linear-gradient(90deg,transparent,var(--line) 8%,var(--line) 92%,transparent)}
+.dark .flowline{background:linear-gradient(90deg,transparent,#243149 8%,#243149 92%,transparent)}
+.flowline .dot{position:absolute;top:-3px;width:8px;height:8px;border-radius:50%;
+  background:var(--bronze);box-shadow:0 0 12px var(--bronze);animation:flowdot 4.5s linear infinite}
+.dark .flowline .dot{background:var(--gold);box-shadow:0 0 12px var(--gold)}
+@keyframes flowdot{0%{left:0;opacity:0}10%{opacity:1}90%{opacity:1}100%{left:100%;opacity:0}}
+@keyframes fdashmove{100%{stroke-dashoffset:-200}}
+@keyframes fpulse{0%,100%{opacity:.6}16%{opacity:1;filter:drop-shadow(0 0 7px currentColor)}44%{opacity:.6}}
+@keyframes edgepulse{0%,100%{opacity:.25}50%{opacity:.9}}
+
+/* ========== 표본 vs 전수 다이어그램 ========== */
+.scan{display:grid;grid-template-columns:1fr 1fr;gap:56px;margin-top:18px}
+.scan .pane{position:relative}
+.scan h5{margin:0 0 18px;font-size:25px;font-weight:900;letter-spacing:-.02em}
+.scan .a h5{color:var(--slate)} .dark .scan .a h5{color:var(--dim)}
+.scan .b h5{color:var(--red)} .dark .scan .b h5{color:var(--gold2)}
+.grid{display:grid;grid-template-columns:repeat(15,1fr);gap:9px}
+.grid u{display:block;width:17px;height:17px;border-radius:4px;background:rgba(18,28,49,.09);
+  text-decoration:none;transition:background .45s,box-shadow .45s}
+.dark .grid u{background:rgba(255,255,255,.08)}
+.scan .a .grid u.hit{background:var(--slate2)}
+.dark .scan .a .grid u.hit{background:#5C6B85}
+.scan .b .grid u.hit{background:var(--red);box-shadow:0 0 9px rgba(181,55,42,.5)}
+.dark .scan .b .grid u.hit{background:var(--gold);box-shadow:0 0 9px rgba(232,184,92,.6)}
+.scan .n{margin-top:20px;font-size:21px;color:var(--slate)}
+.dark .scan .n{color:var(--dim)}
+.scan .n b{font-size:34px;font-weight:900;color:var(--navy);letter-spacing:-.02em}
+.dark .scan .n b{color:#fff}
+.scan .b .n b{color:var(--red)} .dark .scan .b .n b{color:var(--gold)}
+
+/* ========== 단계 파선 ========== */
+.steps>div:not(:last-child):before{content:"";position:absolute;right:20px;top:32px;width:calc(100% - 100px);
+  height:2px;background:repeating-linear-gradient(90deg,#41567C 0 8px,transparent 8px 16px);
+  animation:edgepulse 2.8s ease-in-out infinite}
+.dark .steps>div:not(:last-child):before{background:repeating-linear-gradient(90deg,var(--gold) 0 8px,transparent 8px 16px)}
+
+/* ========== 오버레이 ========== */
+#overview{position:fixed;inset:0;background:rgba(5,8,14,.97);display:none;z-index:60;padding:40px 48px;overflow:auto}
+#overview.show{display:block}
+#overview h3{color:#fff;font-size:19px;margin:0 0 18px;letter-spacing:.04em}
+#ovGrid{display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
+.thumb{background:#141D30;border:1px solid #27344B;border-radius:5px;padding:8px 9px;cursor:pointer;min-height:58px}
+.thumb:hover{background:#1E2B45;border-color:var(--gold)}
+.thumb b{display:block;font-size:10.5px;color:#6F82A6;margin-bottom:3px}
+.thumb span{display:block;font-size:12px;color:#C6D0E0;line-height:1.3}
+.thumb.p1{border-left:3px solid #7FB5E8}.thumb.p2{border-left:3px solid var(--gold)}.thumb.p3{border-left:3px solid #8FD3B0}
+#rehearse{position:fixed;left:0;right:0;bottom:0;background:#080C14;color:#C6D0E0;border-top:2px solid #26344C;
+  padding:13px 22px;display:none;z-index:50;font-size:15px;line-height:1.5}
+body.rehearsing #rehearse{display:flex;gap:22px;align-items:flex-start}
+#rhNote{flex:1}
+#rhNote b{color:var(--gold);display:block;font-size:12px;letter-spacing:.14em;margin-bottom:4px}
+#rhTime{text-align:right;min-width:215px;font-variant-numeric:tabular-nums}
+#rhTime .big{font-size:29px;font-weight:900;color:#fff;display:block;line-height:1.1}
+#rhTime small{font-size:12.5px;color:#7D8DAB}
+#rhTime .ahead{color:#8FD3B0}#rhTime .behind{color:#E8907F}
+#hint{position:fixed;right:14px;top:11px;color:#3F4C63;font-size:11.5px;letter-spacing:.06em;z-index:40}
+#pageno{position:fixed;left:14px;top:11px;color:#3F4C63;font-size:11.5px;z-index:40;font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:reduce){
+  .slide,.slide.active,.slide.exiting,.slide [data-anim]{transition-duration:.01ms!important}
+  .dots i.on{animation:none}
+}
+</style>
+</head>
+<body>
+<div id="stage"><div id="canvas">
+<!-- ===== 오프닝 ===== -->
+<section class="slide dark" data-title="표지" data-t="1">
+  <div class="tag">전북특별자치도교육청 감사관실 직원 연수</div>
+  <h1>AI를 활용한<br/>감사보고서 작성 및<br/>감사 활용 프로그램</h1>
+  <div class="meta">
+    <div><span>대상</span><b>감사관실 직원</b></div>
+    <div><span>형식</span><b>이론강의 · 시연 4회</b></div>
+    <div><span>강사</span><b>빅데이터팀 · 교데통 담당</b></div>
+  </div>
+  <div class="foot">AI · AUDIT</div><div class="pg">01</div>
+  <div class="note">인사는 짧게. 제목을 읽지 말고 바로 넘긴다. 오프닝에서 AI 이야기를 꺼내지 않는 것이 설계 의도.</div>
+</section>
+
+<section class="slide dark" data-title="어떻게 찾으셨습니까" data-t="3">
+  <div class="tag">오프닝</div>
+  <h1>이 지적 9건,<br/>어떻게 찾으셨습니까?</h1>
+  <p class="sub">○○여자고등학교 종합감사 · 2026. 8. 공개 · 감사 3일 · 감사인원 6명</p>
+  <div class="foot">AI · AUDIT</div><div class="pg">02</div>
+  <div class="note">공개자료 원문을 화면에 띄워 두었다가 이 장으로 넘어오면 좋다. 답을 기다리지 말고 다음 장으로. 지적 9건 목록은 배포자료 1쪽에 있다.</div>
+</section>
+
+<section class="slide" data-title="전부 같은 모양" data-t="5">
+  <div class="tag">9건을 모아놓고 보면</div>
+  <h1 class="sm">전부 같은 모양이었습니다</h1>
+  <div class="eq">
+    <div class="box"><b>기준</b><span>법령 · 지침이 정한 값</span></div>
+    <div class="op">↔</div>
+    <div class="box"><b>실제</b><span>학교가 한 일</span></div>
+  </div>
+  <p class="sub">9건 중 <b class="em">9건</b>. 주관적 판단으로 찾아낸 건 하나도 없습니다.</p>
+  <div class="foot">AI · AUDIT</div><div class="pg">03</div>
+  <div class="note">강의 전체의 축. 감사 업무를 '판단'이 아니라 '대조'로 재정의하는 장면. 다음 장에서 실제 예시 셋을 보인다.</div>
+</section>
+
+<section class="slide" data-title="대조 예시 3" data-t="7">
+  <div class="tag">오프닝</div>
+  <h1 class="xs">실제로 무엇과 무엇을 맞춰봤나</h1>
+  <div class="li5">
+    <div><i>04</i><b>육아시간</b><span>같은 날 육아시간 + 조퇴 ↔ 최소근무 4시간</span></div>
+    <div><i>06</i><b>출장 여비</b><span>왕복 2km 이내 ↔ 여비 지급 여부</span></div>
+    <div><i>02</i><b>봉사활동 실적</b><span>출결 기록 ↔ 봉사활동 입력</span></div>
+    <div><i>07</i><b>계약심사</b><span>추정금액 7천만원 ↔ 심사 요청 여부</span></div>
+    <div><i>09</i><b>하자보수 증권</b><span>계약 건 ↔ 증권 징구 여부</span></div>
+  </div>
+  <p class="sub tight">나머지 4건도 같습니다.</p>
+  <div class="foot">AI · AUDIT</div><div class="pg">04</div>
+  <div class="note">9건 전체 대조표는 배포자료 2쪽. 여기서는 다섯 개만 보이고 "나머지도 같다"로 넘긴다.</div>
+</section>
+
+<section class="slide dark" data-title="119개 학교" data-t="9">
+  <div class="tag">그런데 이 학교가 특별한가</div>
+  <h1>출장여비 <span class="strike">한 학교의 문제</span><br/><span class="em">119개 학교</span>의 문제</h1>
+  <div class="flowline"><span class="dot"></span></div>
+  <div class="rule"></div>
+  <p class="sub">이 학교의 지적 9건은 <b>전부 전북 상위 유형</b>이었습니다.</p>
+  <div class="src">2023~2026년 전북 종합감사 공개자료 · 학교 지적사항 3,482건 분석</div>
+  <div class="foot">AI · AUDIT</div><div class="pg">05</div>
+  <div class="note">9건↔전체순위 매핑표는 배포자료 3쪽. 여기서는 숫자 하나만. 오늘 볼 것 셋을 예고 — 기준을 아는 법 / 실제를 보는 법 / 문장으로 쓰는 법.</div>
+</section>
+
+<!-- ===== PART 1 ===== -->
+<section class="slide dark" data-title="PART 1 표지" data-t="10">
+  <div class="secnum">01</div>
+  <div class="tag">PART 1</div>
+  <h1 class="sm">보고서 작성에<br/>AI를 쓰는 법</h1>
+  <div class="foot">PART 1 · 보고서 작성</div><div class="pg">06</div>
+  <div class="note">기대하고 오셨을 부분을 먼저, 정직하게 처리하겠다고 예고.</div>
+</section>
+
+<section class="slide dark" data-title="왜 안 되나" data-t="12">
+  <div class="tag">1-1 · 경계</div>
+  <h1 class="sm">"이 사실관계로<br/>지적사항 써줘"</h1>
+  <p class="sub">왜 이게 안 될까요.</p>
+  <div class="foot">PART 1 · 보고서 작성</div><div class="pg">07</div>
+  <div class="note">이미 해보신 분이 계실 수 있다. 비난조로 가지 말고 "경계가 어디인지 같이 정하자"는 톤으로.</div>
+</section>
+
+<section class="slide" data-title="시점" data-t="14">
+  <div class="tag">이유 하나 · 시점</div>
+  <div class="two">
+    <div class="pl"><h4>감사기간</h4><p class="mono" style="font-size:34px;color:var(--navy);font-weight:800">2026. 6. 17.<br/>~ 6. 19.</p></div>
+    <div class="pl"><h4>공개</h4><p class="mono" style="font-size:34px;color:var(--navy);font-weight:800">2026. 8.</p></div>
+  </div>
+  <h1 class="xs" style="margin-top:34px">문단을 쓰는 <b class="em">6월</b>에는<br/>감사가 진행 중이고 결과도 확정 전입니다</h1>
+  <p class="sub tight">8월에 공개될 문장이라고 해서 6월에 공개 가능한 것이 아닙니다.</p>
+  <div class="foot">PART 1 · 보고서 작성</div><div class="pg">08</div>
+  <div class="note">공개본은 판단이 끝난 뒤의 결과물이지 출발점이 아니다. 같은 이유로 '내 초안을 AI에 넣어 검토시키기'도 성립하지 않는다 — 미확정 초안은 미공개 자료.</div>
+</section>
+
+<section class="slide dark" data-title="조합 특정" data-t="16">
+  <div class="tag">이유 둘 · 조합</div>
+  <h1 class="xs">학교명을 지워도</h1>
+  <div class="code" style="margin-top:26px">
+    <pre><span class="k">"2026년 6월, 정읍 소재 여자고등학교,
+ 기간제교원 6명, 연가 초과 사용"</span></pre>
+  </div>
+  <h1 class="sm" style="margin-top:34px">이 정도면 <span class="em">이미 좁습니다</span></h1>
+  <p class="sub tight">진행 중인 건은 <b>시점까지</b> 흐려야 합니다.</p>
+  <div class="foot">PART 1 · 보고서 작성</div><div class="pg">09</div>
+  <div class="note">비식별했다고 안심하면 안 된다는 것. 조합으로 특정되는 순간을 실감나게.</div>
+</section>
+
+<section class="slide paper" data-title="3단 기준" data-t="18">
+  <div class="tag">1-1 · 가져가실 한 장</div>
+  <h1 class="xs">무엇을 넣고 무엇을 넣지 않는가</h1>
+  <div class="cols c3">
+    <div class="k acc"><b>넣지 않는다</b><span>진행 중인 감사 건<br/>증빙 · 명단 · 원자료<br/>제보 · 신고<br/>작성 중인 초안</span></div>
+    <div class="k"><b>기준 있을 때만</b><span>비식별한 사실관계<br/>익명화한 수치<br/><br/>— 조직이 정할 일</span></div>
+    <div class="k"><b>자유롭게</b><span>법령 · 훈령 · 예규 · 고시<br/>공개된 감사결과<br/>공개된 지침 · 매뉴얼<br/>형식 · 문체 작업</span></div>
+  </div>
+  <p class="sub">오늘 다루는 방법은 <b class="em">전부 오른쪽 칸 안에서만</b> 움직입니다.</p>
+  <div class="foot">PART 1 · 보고서 작성</div><div class="pg">10</div>
+  <div class="note">사진 찍으실 분들을 위해 잠깐 멈춘다. 가운데 칸은 "안 된다"가 아니라 "혼자 정하지 말라"는 뜻.</div>
+</section>
+
+<section class="slide dark" data-title="근거 20개 9종류" data-t="20">
+  <div class="tag">1-2 · 기준을 아는 일</div>
+  <h1 class="xs">감사 하나에 걸리는 근거</h1>
+  <div class="nums">
+    <div><span class="huge">20</span><span class="unit">개</span><p class="cap">근거 법령 · 지침</p></div>
+    <div><span class="huge n">9</span><span class="unit">종류</span><p class="cap">법률 · 시행령 · 훈령 · 예규 · 고시 · 지침 · 매뉴얼 · 편람 · 학교 규정</p></div>
+  </div>
+  <p class="sub">지적 9건에 이만큼이 걸립니다.</p>
+  <div class="foot">PART 1 · 보고서 작성</div><div class="pg">11</div>
+  <div class="note">전체 목록은 배포자료 4쪽. 7번 지적 하나에만 법률+시행령+집행기준+교육청지침 네 겹이라는 것만 말로 덧붙인다.</div>
+</section>
+
+<section class="slide" data-title="행위 당시 규정" data-t="22">
+  <div class="tag">더 어려운 것</div>
+  <h1 class="sm">지금 규정이 아니라<br/><span class="em">행위 당시 규정</span>입니다</h1>
+  <div class="li5" style="margin-top:26px">
+    <div><b>「2023~2024년 계약제교원 운영지침」</b><span>연도판</span></div>
+    <div><b>「2024~2026학년도 학교스포츠클럽 운영 매뉴얼」</b><span>학년도판</span></div>
+    <div><b>중소벤처기업부 고시 제2025-96호</b><span>수시 개정</span></div>
+  </div>
+  <p class="sub tight">감사범위가 3년이면 <b>그 3년 각 시점의 판</b>을 알아야 합니다.</p>
+  <div class="foot">PART 1 · 보고서 작성</div><div class="pg">12</div>
+  <div class="note">순환보직이라 새로 오신 분은 이걸 처음부터 다시 쌓는다는 점을 덧붙인다. 여기가 1부의 진짜 pain point.</div>
+</section>
+
+<section class="slide dark" data-title="지식베이스 시연" data-t="25">
+  <div class="demo">시연 ①</div>
+  <div class="tag">1-2 · 해법</div>
+  <h1 class="sm">기준을 통째로 넣어두고<br/>물어봅니다</h1>
+  <p class="sub">법령 · 시행령 · 훈령 · 예규 · 고시 · 교육청 지침 · <b class="em">연도별 과거 버전</b> · 공개된 감사결과 · 질의회신 사례집</p>
+  <div class="foot">PART 1 · 보고서 작성</div><div class="pg">13</div>
+  <div class="note">여기서 화면 전환. 미리 넣어둔 지식베이스에 질문을 던진다 — "기간제교원 6개월 계약이면 정당 연가일수가 며칠입니까?" 답이 나오면 근거 표시를 눌러 원문까지 보여줄 것. 넣을 자료 목록은 배포자료 5쪽.</div>
+</section>
+
+<section class="slide" data-title="출처가 붙느냐" data-t="27">
+  <div class="tag">왜 이 방식인가</div>
+  <div class="two">
+    <div class="no"><h4>일반 챗봇</h4><ul>
+      <li>근거를 못 댄다</li>
+      <li>없는 조항도 매끄럽다</li>
+      <li>확인하려면 처음부터 다시</li></ul></div>
+    <div class="yes"><h4>넣어둔 문서 안에서만</h4><ul>
+      <li><b>어느 문서 어느 대목</b>인지 표시</li>
+      <li>클릭하면 원문</li>
+      <li>넣지 않은 건 답하지 않는다</li></ul></div>
+  </div>
+  <h1 class="xs" style="margin-top:34px">AI 말을 못 믿는 게 기본인 부서에서는<br/><b class="em">근거를 바로 열어볼 수 있느냐</b>가 갈립니다</h1>
+  <div class="foot">PART 1 · 보고서 작성</div><div class="pg">14</div>
+  <div class="note">도구 이름보다 "출처가 붙는 방식이냐"가 선택 기준. 도구는 바뀌어도 이 기준은 남는다.</div>
+</section>
+
+<section class="slide" data-title="외부 서버 경고" data-t="29">
+  <div class="tag">⚠ 반드시 확인할 것</div>
+  <h1 class="sm">이것도 <span class="em">외부 서버</span>입니다</h1>
+  <div class="two" style="margin-top:26px">
+    <div class="yes"><h4>넣어도 되는 것</h4><ul>
+      <li>법령 · 훈령 · 예규 · 고시</li>
+      <li><b>누리집에 공개된</b> 지침 · 매뉴얼</li>
+      <li><b>이미 공개된</b> 감사결과</li></ul></div>
+    <div class="no"><h4>넣으면 안 되는 것</h4><ul>
+      <li>감사 자료 · 증빙 · 명단</li>
+      <li><b>대외비</b> 내부 지침</li>
+      <li>진행 중인 감사 · 작성 중인 보고서</li></ul></div>
+  </div>
+  <p class="sub tight">먼저 할 일 — <b>우리 청 지침이 공개인가 대외비인가</b>를 하나하나 확인하는 것.</p>
+  <div class="foot">PART 1 · 보고서 작성</div><div class="pg">15</div>
+  <div class="note">이 장을 건너뛰지 말 것. 청중이 이미 쓰고 계실 수 있으므로 실질적으로 제일 필요한 대목일 수 있다. 내부 문서까지 넣으려면 로컬 구성이어야 하고 그건 조직 결정.</div>
+</section>
+
+<section class="slide dark" data-title="모양만 넣는다" data-t="31">
+  <div class="tag">1-3 · 원리</div>
+  <h1>사안을 넣지 말고<br/>사안의 <span class="em">모양</span>만</h1>
+  <p class="sub">AI에게서 받는 건 완성된 문장이 아니라 <b>빈 틀</b>입니다. 숫자는 내가 붓습니다.</p>
+  <div class="foot">PART 1 · 보고서 작성</div><div class="pg">16</div>
+  <div class="note">1부의 핵심. 주는 것 — 유형·구조·법령 문언·출력 형식. 안 주는 것 — 기관명·사람·실제 숫자·날짜·미확정 사실.</div>
+</section>
+
+<section class="slide" data-title="✗ vs ✓" data-t="33">
+  <div class="tag">1-3 · 같은 일, 다른 방식</div>
+  <h1 class="xs">무엇을 주느냐가 갈립니다</h1>
+  <div class="two">
+    <div class="no"><h4>✗ 이렇게 쓰면</h4><ul>
+      <li>"이 사실관계로 써줘"<br/>+ <b>실제 자료 붙여넣기</b></li>
+      <li>완성된 문장을 받는다</li>
+      <li>숫자를 AI가 채운다</li>
+      <li><b>자료가 나간다</b></li></ul></div>
+    <div class="yes"><h4>✓ 이렇게 씁니다</h4><ul>
+      <li>"복무 위반 · 다수인 · 2개 학년도 · 회수 있음"<br/>+ <b>이 조건의 문형 3개</b></li>
+      <li><b>빈 틀</b>을 받는다</li>
+      <li><b>숫자는 내가 대입</b></li>
+      <li><b>한 줄도 안 나간다</b></li></ul></div>
+  </div>
+  <div class="foot">PART 1 · 보고서 작성</div><div class="pg">17</div>
+  <div class="note">1부에서 가장 오래 머물 장. 천천히.</div>
+</section>
+
+<section class="slide dark" data-title="문형 받기 시연" data-t="36">
+  <div class="demo">시연 ②</div>
+  <div class="tag">1-3 · 해보면</div>
+  <h1 class="xs">조건만 주고 틀을 받습니다</h1>
+  <div class="code">
+    <button class="copy" onclick="copyPrompt(this)">복사</button>
+    <pre><span class="k">「문제점」 문단 골격을 3가지 제시하라.</span>
+<span class="b">사안 정보는 주지 않는다. 조건만 준다.</span>
+
+· 개인 다수 · 2개 학년도 · 회수 있음
+· 대표 1건을 앞세우고 나머지는 [표]로 묶기
+· 숫자 자리는 <span class="b">{정당일수} {초과분} {금액}</span> 으로 비워둘 것</pre>
+  </div>
+  <p class="sub">받은 틀에 <b class="em">내 숫자를 대입</b>합니다.</p>
+  <div class="foot">PART 1 · 보고서 작성</div><div class="pg">18</div>
+  <div class="note">여기서 화면 전환. 결과가 나오면 물어본다 — "이 틀에서 감사관이 확인해야 할 곳은 어디입니까?" 프롬프트 전문은 배포자료 6쪽.</div>
+</section>
+
+<section class="slide" data-title="검증 3원칙" data-t="38">
+  <div class="tag">어느 방법을 쓰든 마지막은</div>
+  <div class="cols c3">
+    <div class="k acc"><b>조항 번호</b><span>국가법령정보센터<br/>원문으로 재확인</span></div>
+    <div class="k acc"><b>숫자</b><span>원자료에서 다시<br/>AI가 만든 숫자는<br/>회수 근거가 못 됩니다</span></div>
+    <div class="k acc"><b>인용문</b><span>원문 문장과 대조</span></div>
+  </div>
+  <h1 class="xs" style="margin-top:38px">AI는 확신 있게 씁니다.<br/>그런데 <b class="em">감사 문체도 단정적입니다.</b></h1>
+  <div class="foot">PART 1 · 보고서 작성</div><div class="pg">19</div>
+  <div class="note">닮아 있어서 더 위험하다는 말로 닫는다.</div>
+</section>
+
+<section class="slide paper" data-title="한 번 만들어 계속" data-t="40">
+  <div class="tag">1-4 · 정리</div>
+  <h1 class="sm">감사 중에는 열지 않습니다<br/><span class="em">감사 전에 만들어 둡니다</span></h1>
+  <div class="cols c3" style="margin-top:34px">
+    <div class="k"><b>문형집</b><span>공개된 과거 감사결과로</span></div>
+    <div class="k"><b>판단기준 카드</b><span>법령 원문을 요건으로 분해</span></div>
+    <div class="k"><b>마스킹·집계 규칙</b><span>규칙을 글로 정하는 것이 본체</span></div>
+  </div>
+  <p class="sub tight">만드는 시점에는 <b>사안이 없습니다.</b></p>
+  <div class="foot">PART 1 · 보고서 작성</div><div class="pg">20</div>
+  <div class="note">최근 3주 공개 글만 봐도 작성자가 세 분이고 첨부 파일명도 갈렸다. 규칙이 글로 없으면 사람마다 어긋난다.</div>
+</section>
+<!-- ===== PART 2 ===== -->
+<section class="slide dark" data-title="PART 2 표지" data-t="41">
+  <div class="secnum">02</div>
+  <div class="tag">PART 2</div>
+  <h1 class="sm">감사 업무 자체<br/>표본에서 전수로</h1>
+  <div class="foot">PART 2 · 표본에서 전수로</div><div class="pg">21</div>
+  <div class="note">1부는 기대에 대한 답이었고 2부부터가 본론이라고 예고.</div>
+</section>
+
+<section class="slide dark" data-title="정말 병목입니까" data-t="43">
+  <div class="tag">전환</div>
+  <h1>보고서 쓰는 시간이<br/>정말 여러분의<br/><span class="em">병목입니까?</span></h1>
+  <div class="foot">PART 2 · 표본에서 전수로</div><div class="pg">22</div>
+  <div class="note">소리 내어 던지고 3초 둔다.</div>
+</section>
+
+<section class="slide dark" data-title="몇 행을 봐야 합니까" data-t="45">
+  <div class="tag">2-1 · 같은 9건, 다른 질문</div>
+  <h1 class="sm">"이걸 찾으려면<br/><span class="em">몇 행</span>을 봐야 합니까?"</h1>
+  <div class="foot">PART 2 · 표본에서 전수로</div><div class="pg">23</div>
+  <div class="note">3장에서 본 9건을 다시 꺼낸다. 같은 표를 다른 축으로 세우면 다른 결론이 나온다.</div>
+</section>
+
+<section class="slide" data-title="검토 규모" data-t="47">
+  <div class="tag">2-1 · 봐야 할 데이터</div>
+  <h1 class="xs">봐야 할 데이터와 그 규모</h1>
+  <div class="li5">
+    <div><i>04</i><b>육아시간</b><span>복무기록 3년 &nbsp;·&nbsp; <b style="color:var(--accent)">수천 행</b></span></div>
+    <div><i>06</i><b>출장 여비</b><span>출장내역 3년 &nbsp;·&nbsp; <b style="color:var(--accent)">수백~수천 행</b></span></div>
+    <div><i>02</i><b>봉사활동 실적</b><span>출결 × 봉사활동 &nbsp;·&nbsp; <b style="color:var(--accent)">수천 행</b></span></div>
+    <div><i>07</i><b>계약심사 · 하자보수</b><span>계약 건 &nbsp;·&nbsp; 수십</span></div>
+    <div><i>03</i><b>스포츠클럽 절차</b><span>문서 몇 건 &nbsp;·&nbsp; 한 자릿수</span></div>
+  </div>
+  <p class="sub tight">갈리는 지점이 분명합니다 — <b>복무 · 급여 · 지출처럼 행이 많은 데이터.</b></p>
+  <div class="foot">PART 2 · 표본에서 전수로</div><div class="pg">24</div>
+  <div class="note">계약은 수십 건이라 눈으로 봐도 된다는 점도 말한다. 규모가 다르면 접근이 달라야 한다. 전체 표는 배포자료 7쪽.</div>
+</section>
+
+<section class="slide dark" data-title="표본과 전수" data-t="49">
+  <div class="tag">2-1 · 같은 자료, 다른 결과</div>
+  <h1 class="sm">눈으로 보면 <span class="em">표본</span>이고<br/>계산하면 <span class="em">전수</span>입니다</h1>
+  <div class="scan">
+    <div class="pane a"><h5>눈으로 넘기면</h5><div class="grid"></div>
+      <p class="n">3년치 출장내역 중 <b>7건</b> 확인</p></div>
+    <div class="pane b"><h5>규칙으로 거르면</h5><div class="grid"></div>
+      <p class="n">3년치 <b>전부</b> 확인</p></div>
+  </div>
+  <div class="foot">PART 2 · 표본에서 전수로</div><div class="pg">25</div>
+  <div class="note">톤을 한 번 올린다. 감사의 질이 문장력이 아니라 커버리지에서 갈린다.</div>
+</section>
+
+<section class="slide dark" data-title="520000원" data-t="51">
+  <div class="tag">6번 지적 · 3개 회계연도 전수</div>
+  <h1 class="xs">전수로 봤기에 나온 숫자</h1>
+  <div class="nums">
+    <div><span class="huge n w">14</span><span class="unit">명</span><p class="cap">교직원</p></div>
+    <div><span class="huge w">520,000</span><span class="unit">원</span><p class="cap">과다 지급 · 회수</p></div>
+  </div>
+  <p class="sub">전수로 봤기에 나온 숫자입니다. 표본만 봤다면 <b>한두 건</b>에서 그쳤을 겁니다.</p>
+  <div class="foot">PART 2 · 표본에서 전수로</div><div class="pg">26</div>
+  <div class="note">전수로 보느냐가 감사 커버리지를 결정한다는 말로 닫는다.</div>
+</section>
+
+<section class="slide dark" data-title="두 줄을 합쳐야" data-t="53">
+  <div class="tag">2-1 · 눈으로는 못 잡는 것</div>
+  <h1 class="xs">4번 육아시간 — 같은 날 두 줄</h1>
+  <div class="code" style="margin-top:24px">
+    <pre>08:30 ~ 09:30   육아시간   1시간
+12:30 ~ 16:30   조퇴       4시간
+─────────────────────────────
+실제 근무              <span class="k">→ 4시간 미달</span></pre>
+  </div>
+  <p class="sub">육아시간 줄만 봐서는 아무 문제가 없습니다. <b class="em">조퇴 줄과 합쳐야</b> 드러납니다.</p>
+  <div class="foot">PART 2 · 표본에서 전수로</div><div class="pg">27</div>
+  <div class="note">기준은 "육아시간 사용일 최소 근무 4시간 이상, 미달분은 연가 처리". 근거는 국가공무원 복무규정·복무징계 예규. 배포자료 8쪽.</div>
+</section>
+
+<section class="slide dark" data-title="방식의 문제" data-t="55">
+  <h1 class="sm">3년치를 넘기면서<br/>같은 날짜를 매번 찾아 합산하는 일</h1>
+  <p class="sub" style="font-size:30px;margin-top:38px">집중력의 문제가 아니라 <b class="em">방식의 문제</b>입니다.</p>
+  <div class="foot">PART 2 · 표본에서 전수로</div><div class="pg">28</div>
+  <div class="note">여기서 청중이 고개를 끄덕이면 2부는 성공.</div>
+</section>
+
+<section class="slide paper" data-title="선별 기준 4" data-t="57">
+  <div class="tag">2-1 · 무엇부터 손댈지</div>
+  <h1 class="xs">무엇부터 손댈지 고르는 기준</h1>
+  <div class="cols c4">
+    <div class="k"><b>빈도</b><span>3년간 몇 번<br/>지적됐나</span></div>
+    <div class="k acc"><b>검토 규모</b><span>몇 행을<br/>봐야 하나<br/><b>— 가장 중요</b></span></div>
+    <div class="k"><b>판정의 명확성</b><span>숫자 비교로<br/>끝나는가</span></div>
+    <div class="k"><b>데이터 확보</b><span>에듀파인 · 나이스에서<br/>뽑히는가</span></div>
+  </div>
+  <p class="sub">규칙성을 찾았다고 전부 자동화 대상은 아닙니다.<br/>
+  <b>빈도 × 소요시간 × 오류비용 &nbsp;&gt;&nbsp; 만드는 비용 + 유지 비용</b></p>
+  <div class="foot">PART 2 · 표본에서 전수로</div><div class="pg">29</div>
+  <div class="note">부등식을 꼭 말할 것. 3초면 되는 일에 달려드는 게 흔한 실패다. 빈도만으로 고르면 계약이 위로 올라오는데 계약은 눈으로 봐도 된다.</div>
+</section>
+
+<section class="slide dark" data-title="규칙만 준다" data-t="59">
+  <div class="tag">2-2 · 핵심</div>
+  <div class="code">
+    <button class="copy" onclick="copyPrompt(this)">복사</button>
+    <pre><span class="k">왕복 2km 이내 근거리 출장으로 실비가 발생하지 않으면
+여비를 지급하지 않는다.</span>
+
+이 조건에 해당하는데 <span class="b">여비가 지급된 행</span>을 찾는
+엑셀 수식을 만들어 줘.
+
+[열]  출장자 · 출장일 · 출장지 · 왕복거리 · 여비지급액 · 실비서류</pre>
+  </div>
+  <h1 class="xs" style="margin-top:30px">데이터가 아니라 <span class="em">규칙</span>을 줍니다</h1>
+  <div class="foot">PART 2 · 표본에서 전수로</div><div class="pg">30</div>
+  <div class="note">나가는 것은 규칙과 열 이름뿐. 출장 데이터는 한 줄도 안 나간다. 받은 수식은 내 PC에서 돌린다.</div>
+</section>
+
+<section class="slide" data-title="문제가 생기지 않는다" data-t="61">
+  <h1 class="sm">1부에서 계속 걸렸던 문제가<br/>여기서는 <span class="em">생기지 않습니다</span></h1>
+  <p class="sub">자료를 내보내지 않으니까요. 판정은 <b>내 컴퓨터에서</b> 일어납니다.</p>
+  <div class="foot">PART 2 · 표본에서 전수로</div><div class="pg">31</div>
+  <div class="note">짧게 지나간다. 호흡 조절용.</div>
+</section>
+
+<section class="slide" data-title="자료요구 설계" data-t="63">
+  <div class="tag">2-3 · 전제 조건</div>
+  <div class="two">
+    <div class="no"><h4>일자 단위로 받으면</h4>
+      <p class="mono" style="font-size:19px">2024-05-14  육아시간  사용<br/>2024-05-14  조퇴      사용</p>
+      <p style="margin-top:14px;font-size:20px">→ <b>판정 불가</b></p></div>
+    <div class="yes"><h4>시각 단위로 받으면</h4>
+      <p class="mono" style="font-size:19px">2024-05-14  육아시간  08:30~09:30<br/>2024-05-14  조퇴      12:30~16:30</p>
+      <p style="margin-top:14px;font-size:20px">→ <b>합산해서 판정</b></p></div>
+  </div>
+  <h1 class="xs" style="margin-top:32px">자료를 <b class="em">어떻게 받느냐</b>가<br/>무엇을 찾을 수 있는지를 정합니다</h1>
+  <div class="foot">PART 2 · 표본에서 전수로</div><div class="pg">32</div>
+  <div class="note">출장여비도 같다 — 거리 정보가 없으면 2km 판정 자체가 불가능. 그리고 이건 도구의 전제이기도 하다. 3부로 넘어가는 다리.</div>
+</section>
+
+<section class="slide dark" data-title="3482건" data-t="65">
+  <div class="tag">2-4 · 범위를 넓혀서</div>
+  <h1 class="xs">전북 전체는 어떻습니까</h1>
+  <div class="nums">
+    <div><span class="huge">3,482</span><span class="unit">건</span><p class="cap">2023~2026 학교 지적사항</p></div>
+    <div><span class="huge n">36</span><span class="unit">유형</span></div>
+  </div>
+  <p class="sub">전북교육청이 누리집에 공개한 종합감사 결과를 전부 모아 유형별로 묶었습니다. <b>전부 공개 자료입니다.</b></p>
+  <div class="foot">PART 2 · 표본에서 전수로</div><div class="pg">33</div>
+  <div class="note">2023년은 145건으로 적다(2024년 1,033·2025년 1,317). 추세가 아니라 누적으로 읽어야 한다는 점을 말로 덧붙일 것.</div>
+</section>
+
+<section class="slide" data-title="상위 5유형" data-t="68">
+  <div class="tag">되풀이되는 것들 · 상위 5</div>
+  <h1 class="xs">가장 많이 나온 유형</h1>
+  <div class="rank">
+    <div><i>1</i><b>시설공사 계약·집행</b><u>291</u><s>152개 학교</s></div>
+    <div><i>2</i><b>호봉·정근수당 등 보수 지급</b><u>236</u><s>138개 학교</s></div>
+    <div><i>3</i><b>시설공사 준공검사·정산</b><u>215</u><s>147개 학교</s></div>
+    <div><i>4</i><b>지출·회계 처리</b><u>206</u><s>126개 학교</s></div>
+    <div><i>5</i><b>학교생활기록부 기재·정정</b><u>195</u><s>130개 학교</s></div>
+  </div>
+  <p class="sub tight">상위 10개가 전체의 <b class="em">58%</b>, 상위 20개가 <b class="em">81%</b>입니다.</p>
+  <div class="foot">PART 2 · 표본에서 전수로</div><div class="pg">34</div>
+  <div class="note">6~14위는 배포자료 9쪽. 출장여비 6위(194건), 복무관리 8위(181건)는 뒤에서 다시 나온다.</div>
+</section>
+
+<section class="slide dark" data-title="학교가 모른다" data-t="70">
+  <div class="tag">같은 지적이 반복된다는 것은</div>
+  <h1 class="xs">같은 지적이 반복된다는 것은</h1>
+  <div class="nums">
+    <div><span class="huge">119</span><span class="unit">개 학교</span><p class="cap">출장여비 지급 부적정</p></div>
+    <div><span class="huge">104</span><span class="unit">개 학교</span><p class="cap">복무 관리 부적정</p></div>
+  </div>
+  <p class="sub"><b>학교가 모르고 있다</b>는 뜻이기도 합니다.</p>
+  <div class="foot">PART 2 · 표본에서 전수로</div><div class="pg">35</div>
+  <div class="note">감사관실의 목적이 적발이 아니라 예방이라면, 이 목록을 먼저 돌리는 것이 지적을 줄이는 가장 빠른 길이다.</div>
+</section>
+
+<section class="slide dark" data-title="스물네 가지 시연" data-t="73">
+  <div class="demo">시연 ④</div>
+  <div class="tag">2-4 · 정리해 둔 것</div>
+  <h1 class="sm">감사에서 되풀이되는 지적,<br/>스물네 가지</h1>
+  <div class="flowline"><span class="dot"></span></div>
+  <div class="cols c3" style="margin-top:34px">
+    <div class="k"><b>감사관실</b><span>이번에 무엇을<br/>중점적으로 볼지</span></div>
+    <div class="k"><b>학교</b><span>감사 전에 스스로<br/>짚어볼 목록</span></div>
+    <div class="k"><b>신규 전입자</b><span>분야별로 무엇이<br/>문제가 되는지</span></div>
+  </div>
+  <div class="foot">PART 2 · 표본에서 전수로</div><div class="pg">36</div>
+  <div class="note">여기서 화면 전환 — 분야 필터와 사례 펼침을 보여준다. 자가점검표 문장은 감사관 검수가 필요하다는 점을 덧붙일 것.</div>
+</section>
+<!-- ===== PART 3 ===== -->
+<section class="slide dark" data-title="PART 3 표지" data-t="74">
+  <div class="secnum">03</div>
+  <div class="tag">PART 3</div>
+  <h1 class="sm">그 계산을<br/>어디서 돌릴 것인가</h1>
+  <div class="flowline"><span class="dot"></span></div>
+  <div class="foot">PART 3 · 교데통</div><div class="pg">37</div>
+  <div class="note">여기서 강사 소속을 한 번 더 밝힌다. 빅데이터팀에서 교데통을 담당하고 있어서 이 이야기를 할 수 있다고.</div>
+</section>
+
+<section class="slide dark" data-title="학교에서 받아야 합니까" data-t="76">
+  <div class="tag">3-1 · 질문</div>
+  <h1>그 자료,<br/>꼭 <span class="em">학교에서</span><br/>받아야 합니까?</h1>
+  <p class="sub">종합감사 한 번에 학교가 만드는 자료가 수십 개입니다.</p>
+  <div class="foot">PART 3 · 교데통</div><div class="pg">38</div>
+  <div class="note">그런데 그 원천이 대부분 에듀파인과 나이스다.</div>
+</section>
+
+<section class="slide paper" data-title="가공 vs 원천" data-t="78">
+  <div class="tag">3-1 · 무엇이 다른가</div>
+  <h1 class="xs">가공된 자료와 원천 데이터</h1>
+  <div class="two">
+    <div class="no"><h4>학교가 정리해 준 자료</h4><ul>
+      <li>이미 <b>가공된 것</b> — 누락·왜곡</li>
+      <li>학교 부담이 크다</li>
+      <li>요구한 만큼만</li>
+      <li>학교마다 형식이 다르다</li></ul></div>
+    <div class="yes"><h4>원천 데이터</h4><ul>
+      <li><b>원본 그대로</b></li>
+      <li>학교가 할 일이 <b>없다</b></li>
+      <li><b>전수</b></li>
+      <li>형식이 통일돼 있다</li></ul></div>
+  </div>
+  <p class="sub tight">6번 지적은 3년 전수를 봐야 나온 것입니다. 학교가 정리해 줬다면 <b>몇 건이 빠졌을지</b> 알 수 없습니다.</p>
+  <div class="foot">PART 3 · 교데통</div><div class="pg">39</div>
+  <div class="note">학교 업무 경감과 감사 정확도가 같은 방향이라는 점. 어느 한쪽을 희생하는 이야기가 아니다.</div>
+</section>
+
+<section class="slide dark" data-title="1인수의계약 시연" data-t="82">
+  <div class="demo">시연 ③</div>
+  <div class="tag">3-2 · 이미 만들어 본 것</div>
+  <h1 class="sm">1인 수의계약 모니터</h1>
+  <p class="sub" style="font-size:27px">같은 업체와 <b class="em">건당 1천만원 이상</b> 계약을 한 회계연도에 <b class="em">2회 이상</b><br/>
+  + 90일 · 30일 · 7일 <b class="em">분할 발주</b> 탐지</p>
+  <div class="foot">PART 3 · 교데통</div><div class="pg">40</div>
+  <div class="note">여기서 화면 전환 — 반복 수의계약 탭, 조합별 요약, 해당 계약 목록, CSV 내려받기. 2~3분. 재무과 요청으로 만들었지만 본질은 감사 도구라는 점을 덧붙인다.</div>
+</section>
+
+<section class="slide dark" data-title="밖에서 긁어서" data-t="85">
+  <div class="tag">3-2 · 정직하게</div>
+  <h1 class="sm">그런데 이건<br/><span class="em">밖에서 긁어서</span> 만든 겁니다</h1>
+  <div class="chips">
+    <div class="chip"><b>사업자등록번호</b><span class="x">없음</span></div>
+    <div class="chip"><b>공공데이터포털</b> 연 1회 갱신<span class="x">불가</span></div>
+    <div class="chip"><b>누리집 구조 변경</b><span class="x">중단</span></div>
+    <div class="chip"><b>회계연도 ≠ 계약연도</b><span class="x">오차</span></div>
+  </div>
+  <p class="sub">안에서 하면 <b>이 한계가 전부 사라집니다.</b></p>
+  <div class="foot">PART 3 · 교데통</div><div class="pg">41</div>
+  <div class="note">3부에서 가장 중요한 장. 자기 작업의 약점을 먼저 말하는 것이 다음 논지를 세운다. 서둘러 넘기지 말 것.</div>
+</section>
+
+<section class="slide dark" data-title="안에서 하면" data-t="87">
+  <h1 class="sm">밖에서 긁어서도 이만큼 됩니다.<br/>안에서 하면 <span class="em">이 한계가 전부 사라집니다.</span></h1>
+  <div class="cols c3" style="margin-top:38px">
+    <div class="k acc"><b>정확해집니다</b><span>사업자등록번호로 식별<br/>컬럼 전부 · 원천 직독</span></div>
+    <div class="k acc"><b>학교가 일을 안 합니다</b><span>자료 요구 자체가 줄어듦</span></div>
+    <div class="k acc"><b>상시 · 전수</b><span>감사 기간이 아니라<br/>연중 계속</span></div>
+  </div>
+  <div class="foot">PART 3 · 교데통</div><div class="pg">42</div>
+  <div class="note">교데통은 시스템 안의 데이터라면 무엇이든 데이터관리카드로 만들 수 있고, 감사관실은 이미 접근 권한이 있다.</div>
+</section>
+
+<section class="slide" data-title="감사 방식이 바뀐다" data-t="89">
+  <div class="tag">3-3 · 그러면</div>
+  <h1 class="xs">감사 방식이 바뀝니다</h1>
+  <div class="two">
+    <div class="pl"><h4>지금</h4><ul>
+      <li>실지감사 <b>3일</b></li>
+      <li><b>표본</b></li>
+      <li>처음부터 찾기</li>
+      <li>학교는 자료 수십 건 작성</li></ul></div>
+    <div class="yes"><h4>교데통 모니터링</h4><ul>
+      <li><b>연중 상시</b></li>
+      <li><b>전수</b></li>
+      <li><b>이상 징후만</b> 확인</li>
+      <li>학교는 해명과 소명</li></ul></div>
+  </div>
+  <p class="sub tight">같은 3일로 <b class="em">훨씬 깊이</b> 볼 수 있게 됩니다.</p>
+  <div class="foot">PART 3 · 교데통</div><div class="pg">43</div>
+  <div class="note">"감사 기간을 줄이자"가 아니라 "같은 기간에 더 깊이 보자"로 말할 것.</div>
+</section>
+
+<section class="slide dark" data-title="934건 27%" data-t="91">
+  <div class="tag">3-4 · 무엇부터 만들지는</div>
+  <h1 class="xs">무엇부터 만들지는 데이터가 말합니다</h1>
+  <div class="nums">
+    <div><span class="huge">934</span><span class="unit">건</span><p class="cap">계산으로 걸러지는 상위 5개 유형</p></div>
+    <div><span class="huge n">27</span><span class="unit">%</span><p class="cap">전체 3,482건 대비</p></div>
+  </div>
+  <p class="sub">그리고 <b class="em">전부 교데통 안에 있는 데이터</b>입니다.</p>
+  <div class="foot">PART 3 · 교데통</div><div class="pg">44</div>
+  <div class="note">"이런 걸 만들면 어떨까요"가 아니라 "3년치가 이렇게 말합니다".</div>
+</section>
+
+<section class="slide" data-title="계산으로 걸러지는 5" data-t="93">
+  <div class="tag">3-4 · 그 다섯 가지</div>
+  <h1 class="xs">계산으로 걸러지는 다섯 가지</h1>
+  <div class="rank">
+    <div><i>2</i><b>호봉·정근수당 등 보수 지급</b><u>236</u><s>에듀파인</s></div>
+    <div><i>6</i><b>출장여비 지급</b><u>194</u><s>에듀파인·나이스</s></div>
+    <div><i>8</i><b>복무 관리 전반</b><u>181</u><s>나이스</s></div>
+    <div><i>9</i><b>지도수당·강사비</b><u>169</u><s>에듀파인</s></div>
+    <div><i>11</i><b>세출예산 집행 과목</b><u>154</u><s>에듀파인</s></div>
+  </div>
+  <p class="sub tight">판정이 <b>숫자와 조건의 조합</b>으로 끝나는 것들입니다.</p>
+  <div class="foot">PART 3 · 교데통</div><div class="pg">45</div>
+  <div class="note">착수 순서는 계약·지출(이미 다뤄본 계열) → 복무·인사(시각 단위 확보됨) → 학사·학생(개인정보 민감). 배포자료 10쪽.</div>
+</section>
+
+<section class="slide dark" data-title="절차 4단계" data-t="96">
+  <div class="tag">3-4 · 시작하는 법</div>
+  <h1 class="xs">절차는 이렇습니다</h1>
+  <div class="steps">
+    <div><i>1</i><b>항목 선정</b><span>감사관실이<br/>「이걸 보고 싶다」</span></div>
+    <div><i>2</i><b>카드 제작</b><span>빅데이터팀이<br/>데이터관리카드로</span></div>
+    <div><i>3</i><b>권한 부여</b><span>해당 카드에<br/>감사관실 권한</span></div>
+    <div><i>4</i><b>상시 조회</b><span>교데통에서<br/>직접 확인</span></div>
+  </div>
+  <p class="sub">교데통은 <b class="em">시스템 안의 데이터라면 무엇이든</b> 카드로 만들 수 있고,<br/>감사관실은 <b class="em">이미 접근 권한이 있습니다.</b></p>
+  <div class="foot">PART 3 · 교데통</div><div class="pg">46</div>
+  <div class="note">가능성이 아니라 절차라는 점을 분명히.</div>
+</section>
+
+<!-- ===== 마무리 ===== -->
+<section class="slide dark" data-title="한 줄로" data-t="98">
+  <h1 class="sm">감사 중에는 AI를 쓰지 않습니다.<br/><span class="em">감사 전에 만들어 둡니다.</span></h1>
+  <div class="flowline"><span class="dot"></span></div>
+  <p class="sub">1부의 문형집도, 3부의 모니터링 카드도 같은 원리입니다.<br/>만드는 시점에는 <b>사안이 없습니다.</b></p>
+  <div class="foot">마무리</div><div class="pg">47</div>
+  <div class="note">1부와 3부를 하나로 묶는 장.</div>
+</section>
+
+<section class="slide paper" data-title="오늘의 세 줄" data-t="100">
+  <div class="tag">오늘 말씀드린 것</div>
+  <h1 class="xs">오늘 말씀드린 것</h1>
+  <div class="li5">
+    <div><i>01</i><b>감사 지적은 전부 「기준 ↔ 실제」 대조다</b></div>
+    <div><i>02</i><b>기준은 공개 자료다 — AI로 손에 쥘 수 있다</b></div>
+    <div><i>03</i><b>실제는 내보낼 수 없다 — 교데통 안에서 본다</b></div>
+  </div>
+  <p class="sub">무엇을 쓰든 마지막은 같습니다 — <b>조항은 원문으로, 숫자는 원자료로.</b><br/>
+  AI는 초안을 쓰고, <b class="em">감사관은 그 초안을 감사합니다.</b></p>
+  <div class="foot">마무리</div><div class="pg">48</div>
+  <div class="note">세 줄만 남기고 나머지는 배포자료로 드린다고 말한다.</div>
+</section>
+
+<section class="slide dark" data-title="제안" data-t="103">
+  <div class="tag">제안</div>
+  <h1>어떤 걸 보고 싶으신지<br/>알려주십시오.</h1>
+  <p class="sub" style="font-size:28px">항목만 정해 주시면 <b class="em">데이터관리카드로 만들어 드리겠습니다.</b></p>
+  <div class="foot">전북특별자치도교육청 빅데이터팀</div><div class="pg">49</div>
+  <div class="note">여기서 질의응답을 연다.</div>
+</section>
+
+<section class="slide dark" data-title="세 가지 질문" data-t="106">
+  <div class="tag">그 전에 세 가지만</div>
+  <h1 class="xs">그 전에 세 가지만 여쭙겠습니다</h1>
+  <div class="cols c3">
+    <div class="k acc"><b>무엇을 몇 건</b><span>이 지적을 찾으실 때<br/>무엇을 몇 건 보십니까?</span></div>
+    <div class="k acc"><b>눈으로 넘기는 건</b><span>그중 눈으로 넘기는 건<br/>몇 건입니까?</span></div>
+    <div class="k acc"><b>규칙은 몇 줄</b><span>판정 규칙을 적어보면<br/>몇 줄입니까?</span></div>
+  </div>
+  <p class="sub" style="font-size:28px">이 세 가지만 알려주시면 <b>나머지는 저희가 하겠습니다.</b></p>
+  <div class="foot">전북특별자치도교육청 빅데이터팀</div><div class="pg">50</div>
+  <div class="note">질문 세 개를 실제로 던지고 답을 받아 적을 것. 그 답이 곧 과제 목록이 된다.</div>
+</section>
+
+<section class="slide" data-title="출처" data-t="108">
+  <div class="tag">참고</div>
+  <h1 class="xs">자료와 출처</h1>
+  <div class="li5">
+    <div><b>사례 문서</b><span>○○여자고등학교 종합감사 결과 공개 (2026. 8.)</span></div>
+    <div><b>지적유형 분석</b><span>감사결과공개 게시판 2023~2026 · 학교 3,482건 / 36유형</span></div>
+    <div><b>법령 · 지침</b><span>국가법령정보센터 · 각 부처 훈령·예규·고시</span></div>
+    <div><b>모니터링 도구</b><span>전북교육청 1인 수의계약 모니터</span></div>
+  </div>
+  <p class="sub tight">분석 한계 — 2023년은 145건으로 적어 <b>추세가 아니라 누적</b>으로 읽어야 합니다. '기타' 357건(10%)은 미분류.<br/>
+  <span style="font-size:20px">화면에 없는 표·프롬프트 전문·전체 목록은 <b>배포자료</b>에 있습니다.</span></p>
+  <div class="foot">AI · AUDIT</div><div class="pg">51</div>
+  <div class="note">→ 를 누르면 슬라이드 안에서 한 단계씩 공개되고, 마지막 단계 뒤에 다음 장으로 넘어간다. ← 는 그 반대. F 전체화면 · O 목차 · S 리허설 · R 시계 초기화 · H 숨김. 질의응답 중 이 화면을 띄워두어도 좋다.</div>
+</section>
+</div></div>
+
+<div id="overview"><h3>목차 — 클릭하면 이동합니다 (O 또는 ESC로 닫기)</h3><div id="ovGrid"></div></div>
+<div id="rehearse">
+  <div id="rhNote"><b>발표자 노트</b><span id="rhNoteText"></span><div id="rhNext" style="margin-top:7px;color:#7D8DAB;font-size:13.5px"></div></div>
+  <div id="rhTime"><span class="big" id="rhClock">00:00</span><small id="rhTarget"></small></div>
+</div>
+<div id="pageno"><span id="cur">1</span> / <span id="tot">51</span></div>
+<div id="hint">→ 다음 단계 · ← 뒤로 · F 전체화면 · O 목차 · S 리허설 · R 시계 · H 숨김</div>
+
+<script>
+const slides=[...document.querySelectorAll('.slide')];
+const canvas=document.getElementById('canvas');
+let idx=0, prevIdx=-1, rehearsing=false, t0=null, tick=null, exitTimer=null;
+
+/* ---------- 파트 경계 ---------- */
+function partOf(n){ return n<=4?0 : n<=19?1 : n<=35?2 : n<=45?3 : 4; }
+
+/* ---------- 장식 주입 ---------- */
+(function decorate(){
+  slides.forEach((s,n)=>{
+    const bar=document.createElement('div'); bar.className='bar';
+    bar.style.width=Math.round((n+1)/slides.length*100)+'%';
+    s.appendChild(bar);
+    const dots=document.createElement('div'); dots.className='dots';
+    const p=partOf(n);
+    for(let j=0;j<5;j++){ const i=document.createElement('i'); if(j===p)i.className='on'; dots.appendChild(i); }
+    s.appendChild(dots);
+
+    /* 진입 스태거 대상: 라벨·제목·구분선 */
+    [...s.children].forEach(el=>{
+      if(el.matches('.tag,h1,.rule,.flowline')) el.setAttribute('data-anim','');
+    });
+
+    /* 빌드 단위 분해 */
+    const units=[];
+    [...s.children].forEach(el=>{
+      if(el.matches('.note,.foot,.pg,.src,.demo,.bar,.dots,.tag,h1,.rule,.flowline')) return;
+      if(el.matches('.two,.cols,.li5,.rank,.nums,.chips,.steps,.eq,.scan')){
+        [...el.children].forEach(c=>units.push(c));
+      } else units.push(el);
+    });
+    s.querySelectorAll('.scan .grid').forEach(g=>{ for(let j=0;j<90;j++) g.appendChild(document.createElement('u')); });
+    units.forEach(u=>u.classList.add('build'));
+    s._units=units;
+
+    if(units.length>1){
+      const bs=document.createElement('div'); bs.className='builds';
+      for(let j=0;j<units.length;j++) bs.appendChild(document.createElement('i'));
+      s.appendChild(bs); s._bs=bs;
+    }
+  });
+})();
+
+/* ---------- 숫자 카운트업 ---------- */
+function countUp(s){
+  s.querySelectorAll('.huge').forEach(el=>{
+    const raw=(el.dataset.v||el.textContent).trim();
+    if(!el.dataset.v) el.dataset.v=raw;
+    const hasComma=raw.indexOf(',')>=0;
+    const target=parseFloat(raw.replace(/,/g,''));
+    if(isNaN(target)) return;
+    const dur=900, st=performance.now();
+    function frame(t){
+      const p=Math.min((t-st)/dur,1);
+      const e=1-Math.pow(1-p,3);
+      const v=Math.round(target*e);
+      el.textContent=hasComma?v.toLocaleString('ko-KR'):String(v);
+      if(p<1) requestAnimationFrame(frame); else el.textContent=raw;
+    }
+    el.textContent=hasComma?'0':'0';
+    requestAnimationFrame(frame);
+  });
+}
+
+/* ---------- 슬라이드 ---------- */
+document.getElementById('tot').textContent=slides.length;
+let step=0;
+
+function paintBuilds(s){
+  const u=s._units||[];
+  u.forEach((el,k)=>el.classList.toggle('in',k<step));
+  if(s._bs) [...s._bs.children].forEach((i,k)=>i.classList.toggle('on',k<step));
+}
+function scanAnim(pane){
+  const cells=[...pane.querySelectorAll('.grid u')];
+  cells.forEach(c=>c.classList.remove('hit'));
+  if(pane.classList.contains('a')){
+    const order=[...cells.keys()].sort(()=>Math.random()-.5).slice(0,7);
+    order.forEach((ci,k)=>setTimeout(()=>cells[ci].classList.add('hit'),260+k*130));
+  }else{
+    cells.forEach((c,k)=>setTimeout(()=>c.classList.add('hit'),240+k*8));
+  }
+}
+
+function show(i,atEnd){
+  const n=Math.max(0,Math.min(i,slides.length-1));
+  const same=(n===idx && prevIdx>=0);
+  if(same) return;
+  prevIdx=idx; idx=n;
+  if(slides[prevIdx] && prevIdx!==idx){
+    const p=slides[prevIdx];
+    p.classList.remove('active'); p.classList.add('exiting');
+    clearTimeout(exitTimer);
+    exitTimer=setTimeout(()=>slides.forEach(s=>{ if(s!==slides[idx]) s.classList.remove('exiting'); }),700);
+  }
+  const s=slides[idx];
+  s.classList.remove('exiting'); s.classList.add('active');
+  step = atEnd ? (s._units?s._units.length:0) : 0;
+  paintBuilds(s);
+  const items=[...s.querySelectorAll('[data-anim]')];
+  items.forEach(el=>{ el.classList.remove('in'); el.style.transitionDelay='0s'; });
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    items.forEach((el,k)=>{ el.style.transitionDelay=(0.06+k*0.07).toFixed(2)+'s'; el.classList.add('in'); });
+  }));
+  setTimeout(()=>countUp(s),220);
+  document.getElementById('cur').textContent=idx+1;
+  if(rehearsing) paintNote();
+  try{history.replaceState(null,'','#slide-'+(idx+1));}catch(e){}
+}
+
+function next(){
+  const s=slides[idx], u=s._units||[];
+  if(step<u.length){
+    step++; paintBuilds(s);
+    const el=u[step-1];
+    if(el && el.classList.contains('pane')) scanAnim(el);
+    return;
+  }
+  if(idx<slides.length-1) show(idx+1);
+}
+function prev(){
+  const s=slides[idx];
+  if(step>0){ step--; paintBuilds(s); return; }
+  if(idx>0) show(idx-1,true);
+}
+function jump(n){ show(n); }
+
+/* ---------- 스케일 ---------- */
+function fit(){
+  const pad=rehearsing?96:0;
+  const k=Math.min(window.innerWidth/1440,(window.innerHeight-pad)/810);
+  canvas.style.transform='scale('+k+')';
+}
+window.addEventListener('resize',fit);
+
+/* ---------- 목차 ---------- */
+function buildOv(){
+  const g=document.getElementById('ovGrid'); g.innerHTML='';
+  slides.forEach((s,n)=>{
+    const d=document.createElement('div'); d.className='thumb';
+    const p=partOf(n); if(p>=1&&p<=3) d.classList.add('p'+p);
+    d.innerHTML='<b>'+String(n+1).padStart(2,'0')+'</b><span>'+(s.dataset.title||'')+'</span>';
+    d.onclick=()=>{document.getElementById('overview').classList.remove('show'); jump(n);};
+    g.appendChild(d);
+  });
+}
+function toggleOv(){ document.getElementById('overview').classList.toggle('show'); }
+
+/* ---------- 리허설 ---------- */
+function two(n){return String(n).padStart(2,'0');}
+function paintNote(){
+  const n=slides[idx].querySelector('.note');
+  document.getElementById('rhNoteText').textContent=n?n.textContent.trim():'(노트 없음)';
+  const nx=slides[idx+1];
+  document.getElementById('rhNext').textContent=nx?('다음 ▸ '+(nx.dataset.title||'')):'— 마지막 슬라이드 —';
+}
+function paintClock(){
+  const el=Math.floor((Date.now()-t0)/1000);
+  document.getElementById('rhClock').textContent=two(Math.floor(el/60))+':'+two(el%60);
+  const tg=parseInt(slides[idx].dataset.t||'0',10);
+  const d=Math.round(el/60)-tg;
+  let cls='',txt;
+  if(d<=-1){cls='ahead';txt=Math.abs(d)+'분 여유';} else if(d>=1){cls='behind';txt=d+'분 초과';} else txt='정시';
+  document.getElementById('rhTarget').innerHTML='이 장 목표 '+tg+'분 · <span class="'+cls+'">'+txt+'</span>';
+}
+function toggleRehearse(){
+  rehearsing=!rehearsing;
+  document.body.classList.toggle('rehearsing',rehearsing);
+  if(rehearsing){ if(!t0)t0=Date.now(); paintNote(); paintClock(); tick=setInterval(paintClock,1000); }
+  else clearInterval(tick);
+  fit();
+}
+function resetClock(){ t0=Date.now(); if(rehearsing) paintClock(); }
+
+/* ---------- 복사 ---------- */
+function copyPrompt(btn){
+  const t=btn.closest('.code').querySelector('pre').innerText;
+  const done=()=>{const o=btn.textContent;btn.textContent='복사됨';setTimeout(()=>btn.textContent=o,1200);};
+  if(navigator.clipboard&&window.isSecureContext) navigator.clipboard.writeText(t).then(done).catch(()=>fb(t,done));
+  else fb(t,done);
+}
+function fb(t,done){
+  const a=document.createElement('textarea'); a.value=t; a.style.position='fixed'; a.style.opacity='0';
+  document.body.appendChild(a); a.select();
+  try{document.execCommand('copy');done();}catch(e){}
+  document.body.removeChild(a);
+}
+
+/* ---------- 키 ---------- */
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+  const k=e.key.toLowerCase();
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){e.preventDefault();next();}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();prev();}
+  else if(k==='o')toggleOv();
+  else if(k==='s')toggleRehearse();
+  else if(k==='r')resetClock();
+  else if(k==='h'){['hint','pageno'].forEach(id=>{const el=document.getElementById(id);el.style.display=el.style.display==='none'?'':'none';});}
+  else if(k==='f'){ document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen(); }
+  else if(e.key==='Escape')document.getElementById('overview').classList.remove('show');
+  else if(e.key==='Home')jump(0);
+  else if(e.key==='End')jump(slides.length-1);
+});
+document.addEventListener('click',e=>{
+  if(e.target.closest('.copy')||e.target.closest('#overview')||e.target.closest('#rehearse'))return;
+  if(e.clientX>window.innerWidth*0.5)next(); else prev();
+});
+
+/* ---------- 시작 ---------- */
+buildOv(); fit();
+const m=location.hash.match(/slide-(\d+)/);
+show(m?parseInt(m[1],10)-1:0);
+</script>
+</body>
+</html>
