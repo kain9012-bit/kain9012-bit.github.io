@@ -53,7 +53,7 @@ export default function App() {
           className="relative left-1/2 w-screen -translate-x-1/2 -mt-6 bg-blue-50 border-b border-blue-100"
           aria-labelledby="hero-title"
         >
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-9 sm:py-12 space-y-5">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-9 sm:py-12 space-y-5">
             <div className="space-y-2">
               <h1 id="hero-title" className="text-3xl sm:text-[2.5rem] font-bold text-slate-900 leading-tight">
                 업무에 바로 쓰는 <span className="text-blue-700">웹도구</span>
@@ -120,7 +120,7 @@ export default function App() {
           </div>
         </section>
 
-        <div className="max-w-5xl mx-auto mt-8 space-y-10">
+        <div className="mt-8 space-y-10">
           {/* 단계 뜻풀이 */}
           <dl className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-slate-500">
             {data.statuses.map((s) => (
@@ -149,19 +149,11 @@ export default function App() {
                 <SectionTitle id={`sec-${g.id}`} count={g.tools.length} desc={g.desc}>
                   {g.label}
                 </SectionTitle>
-                <div className="border-t-2 border-slate-900">
-                  <div className="hidden sm:grid grid-cols-[minmax(0,1fr)_6.5rem_15rem] gap-x-6 px-5 py-2
-                                  bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-500">
-                    <span>도구</span>
-                    <span className="text-center">단계</span>
-                    <span>주소</span>
-                  </div>
-                  <ul className="divide-y divide-slate-200 border-b border-slate-200">
-                    {g.tools.map((t) => (
-                      <ToolRow key={t.id} tool={t} status={statusOf[t.status]} />
-                    ))}
-                  </ul>
-                </div>
+                <ul className="bg-white rounded-lg border border-slate-200 divide-y divide-slate-200 overflow-hidden">
+                  {g.tools.map((t) => (
+                    <ToolRow key={t.id} tool={t} status={statusOf[t.status]} />
+                  ))}
+                </ul>
               </section>
             ))
           )}

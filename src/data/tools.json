@@ -39,126 +39,132 @@
     },
     {
       "id": "guide",
-      "label": "안내·교육",
-      "desc": "업무 안내서와 강의자료"
+      "label": "업무 안내",
+      "desc": "업무 안내서와 구조도"
+    },
+    {
+      "id": "lecture",
+      "label": "강의자료",
+      "desc": "연수·교육에 쓴 강의자료"
     }
   ],
   "tools": [
     {
       "id": "edu-trends",
       "category": "monitor",
+      "status": "live",
+      "icon": "newspaper",
       "name": "오늘의 교육동향",
       "desc": "교육부·시도교육청 보도자료를 매일 모아 정리한 교육동향 아카이브",
-      "url": "https://jbe-edu-trends.vercel.app",
-      "status": "live"
+      "url": "https://jbe-edu-trends.vercel.app"
     },
     {
       "id": "edupolicy",
       "category": "monitor",
+      "status": "live",
+      "icon": "search",
       "name": "교육정책 통합검색",
       "desc": "시도교육청 정책자료·예산·보도자료를 한 번에 찾는 통합검색",
-      "url": "https://edupolicy-search.vercel.app",
-      "status": "live"
+      "url": "https://edupolicy-search.vercel.app"
     },
     {
       "id": "weekly-meeting",
       "category": "monitor",
+      "status": "pilot",
+      "icon": "video",
       "name": "주간정책회의 브리핑",
       "desc": "주간정책회의·월간기관장회의 영상의 회의 요약과 교육감 지시사항 정리",
-      "url": "https://jbe-weekly-policy-meeting.vercel.app",
-      "status": "live"
+      "url": "https://jbe-weekly-policy-meeting.vercel.app"
     },
     {
       "id": "council-member",
       "category": "monitor",
+      "status": "prep",
+      "icon": "users",
       "name": "도의회 의원별 관심사항",
       "desc": "도의회 교육위원회·예산결산특별위원회 의원별 관심사항과 질의 이력",
-      "url": "https://jbe-council-member-profile.vercel.app",
-      "badge": {
-        "label": "내부 참고",
-        "tone": "amber"
-      },
-      "status": "prep"
+      "url": "https://jbe-council-member-profile.vercel.app"
     },
     {
       "id": "single-bid",
       "category": "monitor",
+      "status": "pilot",
+      "icon": "file-search",
       "name": "1인 수의계약 모니터",
       "desc": "공개 계약정보의 1인 수의계약 현황과 반복·분할 의심 건",
-      "url": "https://jbe-single-bid-monitor.vercel.app",
-      "status": "pilot"
+      "url": "https://jbe-single-bid-monitor.vercel.app"
     },
     {
       "id": "ordinance",
       "category": "check",
+      "status": "pilot",
+      "icon": "scale",
       "name": "자치법규 정합성 점검",
       "desc": "교육청 자치법규의 상위법 개정 반영 여부 대조",
-      "url": "https://jbe-ordinance-check.vercel.app",
-      "status": "pilot"
+      "url": "https://jbe-ordinance-check.vercel.app"
     },
     {
       "id": "press-release",
       "category": "check",
+      "status": "pilot",
+      "icon": "spell-check",
       "name": "보도자료 공공언어 검증",
       "desc": "보도자료 초안을 국립국어원 공문서 평가 기준으로 점검, 수정본은 hwpx로 내려받기",
-      "url": "https://jbe-press-release-checker.vercel.app",
-      "status": "live"
+      "url": "https://jbe-press-release-checker.vercel.app"
     },
     {
       "id": "admin-guide",
       "category": "guide",
+      "status": "live",
+      "icon": "book-open",
       "name": "학교행정업무 길라잡이",
       "desc": "학교행정업무 길라잡이를 업무 흐름과 통합검색으로 보는 웹판",
-      "url": "https://jbe-guide.vercel.app",
-      "status": "live"
+      "url": "https://jbe-guide.vercel.app"
     },
     {
       "id": "system-guide",
       "category": "guide",
+      "status": "live",
+      "icon": "mouse-pointer",
       "name": "교데통 따라하기",
       "desc": "교육행정데이터통합관리시스템(교데통) 실제 화면을 눌러 가며 익히는 안내서",
-      "url": "https://eduadmin-data-guide.vercel.app",
-      "status": "live"
+      "url": "https://eduadmin-data-guide.vercel.app"
     },
     {
       "id": "jedomap",
       "category": "guide",
+      "status": "prep",
+      "icon": "network",
       "name": "전북교육청 제도맵",
       "desc": "주요 업무의 법령·자치법규·조직·절차·문서를 한 장으로 보는 구조도",
-      "url": "https://kain9012-bit.github.io/jbe-jedomap/",
-      "status": "live"
+      "url": "https://kain9012-bit.github.io/jbe-jedomap/"
     },
     {
       "id": "newcomer",
       "category": "guide",
+      "status": "pilot",
+      "icon": "briefcase",
       "name": "행정실 첫 주",
       "desc": "신규 교육행정직이 행정실 첫 주를 미리 겪어 보는 상황 시뮬레이터",
-      "url": "https://kain9012-bit.github.io/jbe-newcomer-simulator/",
-      "status": "pilot"
+      "url": "https://kain9012-bit.github.io/jbe-newcomer-simulator/"
     },
     {
       "id": "dataliteracy",
-      "category": "guide",
+      "category": "lecture",
+      "status": "live",
+      "icon": "presentation",
       "name": "교데통 강의자료",
       "desc": "2026년 찾아가는 교데통 교육 「데이터로 쌓아 올리는 인공지능」",
-      "url": "https://kain9012-bit.github.io/dataliteracy/",
-      "badge": {
-        "label": "강의",
-        "tone": "blue"
-      },
-      "status": "live"
+      "url": "https://kain9012-bit.github.io/dataliteracy/"
     },
     {
       "id": "vibecoding",
-      "category": "guide",
+      "category": "lecture",
+      "status": "live",
+      "icon": "code",
       "name": "바이브코딩 실습 강의",
       "desc": "AI 활용 업무 자동화 실기연수 3시간 실습 슬라이드",
-      "url": "https://kain9012-bit.github.io/ai-work-automation-vibecoding/",
-      "badge": {
-        "label": "강의",
-        "tone": "blue"
-      },
-      "status": "live"
+      "url": "https://kain9012-bit.github.io/ai-work-automation-vibecoding/"
     }
   ]
 }

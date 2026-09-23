@@ -17,6 +17,7 @@ export interface Tool {
   id: string;
   category: string;
   status: string;
+  icon: string;
   name: string;
   desc: string;
   url: string;
