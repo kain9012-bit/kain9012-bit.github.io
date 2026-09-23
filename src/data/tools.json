@@ -88,7 +88,7 @@
     {
       "id": "single-bid",
       "category": "monitor",
-      "status": "pilot",
+      "status": "live",
       "icon": "file-search",
       "name": "1인 수의계약 모니터",
       "desc": "공개 계약정보의 1인 수의계약 현황과 반복·분할 의심 건",
@@ -124,7 +124,7 @@
     {
       "id": "system-guide",
       "category": "guide",
-      "status": "live",
+      "status": "prep",
       "icon": "mouse-pointer",
       "name": "교데통 따라하기",
       "desc": "교육행정데이터통합관리시스템(교데통) 실제 화면을 눌러 가며 익히는 안내서",
