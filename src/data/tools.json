@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-24",
+  "updated": "2026-09-25",
   "statuses": [
     {
       "id": "live",
@@ -41,11 +41,6 @@
       "id": "guide",
       "label": "업무 안내",
       "desc": "업무 안내서와 구조도"
-    },
-    {
-      "id": "lecture",
-      "label": "강의자료",
-      "desc": "연수·교육에 쓴 강의자료"
     }
   ],
   "tools": [
@@ -147,42 +142,6 @@
       "name": "행정실 첫 주",
       "desc": "신규 교육행정직이 행정실 첫 주를 미리 겪어 보는 상황 시뮬레이터",
       "url": "https://kain9012-bit.github.io/jbe-newcomer-simulator/"
-    },
-    {
-      "id": "lec-ai-audit",
-      "category": "lecture",
-      "status": "live",
-      "icon": "presentation",
-      "name": "AI 활용 감사보고서 작성",
-      "desc": "2026 감사관실 연수 · 감사보고서 작성과 감사 업무에 AI를 쓰는 법",
-      "url": "https://kain9012-bit.github.io/lectures/ai-audit/"
-    },
-    {
-      "id": "lec-staff-180",
-      "category": "lecture",
-      "status": "live",
-      "icon": "presentation",
-      "name": "AI 활용 업무 자동화 실기연수 (180분)",
-      "desc": "2026 교직원 AI 연수 · 실습 중심 180분 강의안",
-      "url": "https://kain9012-bit.github.io/lectures/staff-ai-180/"
-    },
-    {
-      "id": "lec-staff-90",
-      "category": "lecture",
-      "status": "live",
-      "icon": "presentation",
-      "name": "AI 활용 교직원 연수 (90분)",
-      "desc": "2026 교직원 AI 연수 · 90분 강의안",
-      "url": "https://kain9012-bit.github.io/lectures/staff-ai-90/"
-    },
-    {
-      "id": "vibecoding",
-      "category": "lecture",
-      "status": "live",
-      "icon": "code",
-      "name": "바이브코딩 실습 강의",
-      "desc": "AI 활용 업무 자동화 실기연수 3시간 실습 슬라이드",
-      "url": "https://kain9012-bit.github.io/ai-work-automation-vibecoding/"
     }
   ]
 }

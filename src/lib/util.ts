@@ -7,5 +7,3 @@ export const korDate = (iso: string) => {
 /** 주소에서 https:// 와 끝의 / 를 떼어 보여준다 */
 export const shortUrl = (url: string) => url.replace(/^https?:\/\//, '').replace(/\/$/, '');
 
-/** 띄어쓰기·대소문자를 무시하고 찾는다 */
-export const norm = (s: string) => s.toLowerCase().replace(/\s+/g, '');
