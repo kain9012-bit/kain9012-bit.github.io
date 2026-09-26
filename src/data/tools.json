@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-25",
+  "updated": "2026-09-26",
   "statuses": [
     {
       "id": "live",
@@ -74,11 +74,20 @@
     {
       "id": "council-member",
       "category": "monitor",
-      "status": "prep",
+      "status": "pilot",
       "icon": "users",
       "name": "도의회 의원별 관심사항",
       "desc": "도의회 교육위원회·예산결산특별위원회 의원별 관심사항과 질의 이력",
       "url": "https://jbe-council-member-profile.vercel.app"
+    },
+    {
+      "id": "na-member",
+      "category": "monitor",
+      "status": "pilot",
+      "icon": "landmark",
+      "name": "국회 교육위원회 위원별 관심사항",
+      "desc": "국회 교육위원회 위원별 관심사항과 질의 이력 · 국정감사 대비",
+      "url": "https://jbe-na-member-profile.vercel.app"
     },
     {
       "id": "single-bid",
