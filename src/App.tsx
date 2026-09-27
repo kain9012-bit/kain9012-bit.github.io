@@ -29,7 +29,7 @@ export default function App() {
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-9 sm:py-12 space-y-2">
             <h1 id="hero-title" className="text-3xl sm:text-[2.5rem] font-bold text-slate-900 leading-tight">
-              업무에 바로 쓰는 <span className="text-blue-700">웹도구</span>
+              업무를 바꾸는 <span className="text-blue-700">웹도구</span>
             </h1>
             <p className="text-base text-slate-600">
               PoC(시제품)부터 실제 운영 중인 서비스까지 모두 담았습니다.
