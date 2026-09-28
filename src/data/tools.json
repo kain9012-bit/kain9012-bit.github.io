@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-26",
+  "updated": "2026-09-29",
   "statuses": [
     {
       "id": "live",
@@ -106,6 +106,15 @@
       "name": "자치법규 정합성 점검",
       "desc": "교육청 자치법규의 상위법 개정 반영 여부 대조",
       "url": "https://jbe-ordinance-check.vercel.app"
+    },
+    {
+      "id": "private-school",
+      "category": "check",
+      "status": "pilot",
+      "icon": "school",
+      "name": "학교법인 정관 점검",
+      "desc": "학교법인 정관의 사립학교법·시행령 저촉·미반영 조항 대조",
+      "url": "https://jbe-private-school-articles.vercel.app"
     },
     {
       "id": "press-release",

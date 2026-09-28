@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   BookOpen, Briefcase, Landmark, Code, ExternalLink, FileSearch, MousePointer, Network, Newspaper,
-  Presentation, Scale, Search, SpellCheck, Users, Video, Wrench,
+  Presentation, Scale, School, Search, SpellCheck, Users, Video, Wrench,
 } from 'lucide-react';
 import type { Status, Tool } from '../types';
 import { Badge } from './Ui';
@@ -9,7 +9,7 @@ import { Badge } from './Ui';
 const ICONS: Record<string, React.FC<{ className?: string }>> = {
   'book-open': BookOpen, briefcase: Briefcase, code: Code, 'file-search': FileSearch,
   'mouse-pointer': MousePointer, network: Network, newspaper: Newspaper,
-  presentation: Presentation, scale: Scale, search: Search, 'spell-check': SpellCheck,
+  presentation: Presentation, scale: Scale, school: School, search: Search, 'spell-check': SpellCheck,
   users: Users, video: Video, landmark: Landmark,
 };
 
