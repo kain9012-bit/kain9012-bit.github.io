@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-29",
+  "updated": "2026-10-05",
   "statuses": [
     {
       "id": "live",
@@ -97,6 +97,15 @@
       "name": "1인 수의계약 모니터",
       "desc": "공개 계약정보의 1인 수의계약 현황과 반복·분할 의심 건",
       "url": "https://jbe-single-bid-monitor.vercel.app"
+    },
+    {
+      "id": "staff-tools",
+      "category": "monitor",
+      "status": "live",
+      "icon": "chart",
+      "name": "교직원 제작 도구 현황",
+      "desc": "데이터 도구실 교직원 제작 도구 게시판의 제작자별·도구별 조회수·댓글 현황",
+      "url": "https://jbe-staff-tools-board.vercel.app"
     },
     {
       "id": "ordinance",
