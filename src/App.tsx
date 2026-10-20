@@ -6,6 +6,7 @@ import { Footer } from './components/Footer';
 import { TopButton } from './components/TopButton';
 import { ToolRow } from './components/ToolCard';
 import { LectureTab } from './components/LectureTab';
+import { VideoTab } from './components/VideoTab';
 import { Badge, SectionTitle } from './components/Ui';
 
 const data = catalog as Catalog;
@@ -20,10 +21,17 @@ const HERO: Record<Tab, { pre: string; key: string; desc: string }> = {
     pre: 'AI 활용', key: '강의자료',
     desc: '연수에서 쓴 강의안·PDF·실습파일입니다. 실습파일 속 이름·연락처는 모두 가상 데이터입니다.',
   },
+  videos: {
+    pre: '업무경감 도구', key: '소개 영상',
+    desc: '설치형 프로그램과 데이터 도구실을 짧은 영상으로 소개합니다.',
+  },
 };
 
-// 주소 끝 #lectures 로 강의자료 탭을 바로 열 수 있게 한다
-const fromHash = (): Tab => (window.location.hash === '#lectures' ? 'lectures' : 'tools');
+// 주소 끝 #lectures · #videos 로 그 탭을 바로 열 수 있게 한다
+const fromHash = (): Tab => {
+  const h = window.location.hash.slice(1);
+  return h === 'lectures' || h === 'videos' ? h : 'tools';
+};
 
 export default function App() {
   const [tab, setTabState] = useState<Tab>(fromHash);
@@ -34,7 +42,7 @@ export default function App() {
   }, []);
   const setTab = (t: Tab) => {
     setTabState(t);
-    history.replaceState(null, '', t === 'tools' ? window.location.pathname : '#lectures');
+    history.replaceState(null, '', t === 'tools' ? window.location.pathname : `#${t}`);
     window.scrollTo({ top: 0 });
   };
   const hero = HERO[tab];
@@ -64,7 +72,7 @@ export default function App() {
         </section>
 
         <div className="mt-8 space-y-10">
-          {tab === 'lectures' ? <LectureTab /> : (
+          {tab === 'lectures' ? <LectureTab /> : tab === 'videos' ? <VideoTab /> : (
             <>
           {/* 단계 뜻풀이 */}
           <dl className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-slate-500">

@@ -6,6 +6,7 @@ import { korDate } from '../lib/util';
 export const TABS: { id: Tab; label: string }[] = [
   { id: 'tools', label: '업무 도구' },
   { id: 'lectures', label: '강의자료' },
+  { id: 'videos', label: '소개 영상' },
 ];
 
 export const Header: React.FC<{ updated: string; count: number; tab: Tab; setTab: (t: Tab) => void }> = ({
