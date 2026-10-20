@@ -60,38 +60,48 @@ export const LectureTab: React.FC = () => {
       ) : !list ? (
         <p role="status" className="py-10 text-sm text-slate-500">강의 목록을 불러오는 중…</p>
       ) : (
-        <ul className="bg-white rounded-lg border border-slate-200 divide-y divide-slate-200 overflow-hidden">
+        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {list.map((l) => (
-            <li key={l.id} className="flex items-center gap-4 px-4 sm:px-5 py-3 min-w-0">
-              <span className="hidden sm:flex w-10 h-10 rounded-lg bg-blue-50 text-blue-700 items-center justify-center shrink-0">
-                <Presentation className="w-5 h-5" aria-hidden="true" />
-              </span>
-              <span className="flex-1 min-w-0 sm:grid sm:grid-cols-[17rem_minmax(0,1fr)] sm:gap-x-6 sm:items-center">
-                <span className="block min-w-0">
-                  <span className="block text-base font-bold text-slate-900">{l.title}</span>
-                  <span className="block mt-0.5 text-xs text-slate-500 tabular-nums">
-                    {[l.date, l.audience, l.duration].filter(Boolean).join(' · ')}
+            <li key={l.id} className="min-w-0">
+              <article className="flex flex-col h-full bg-white rounded-lg border border-slate-200 hover:border-blue-600 transition-colors p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <span className="w-10 h-10 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center shrink-0">
+                    <Presentation className="w-5 h-5" aria-hidden="true" />
                   </span>
-                </span>
-                <span className="block mt-1 sm:mt-0 text-sm text-slate-600">{l.summary ?? l.subtitle}</span>
-              </span>
-              <span className="flex flex-col sm:flex-row gap-1.5 shrink-0">
-                {l.files.map((f) => {
-                  const Icon = FILE_ICON[f.type] ?? Link2;
-                  return (
-                    <a key={f.href} href={HUB + f.href} target="_blank" rel="noopener noreferrer"
-                      {...(f.download ? { download: f.download } : {})}
-                      className={`inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-bold whitespace-nowrap transition-colors ${
-                        f.type === 'slides'
-                          ? 'bg-slate-900 hover:bg-slate-800 text-white'
-                          : 'border border-slate-300 text-slate-700 hover:border-blue-600 hover:text-blue-700'
-                      }`}>
-                      <Icon className="w-3.5 h-3.5" aria-hidden="true" />
-                      {f.type === 'slides' ? '강의안' : f.type === 'pdf' ? 'PDF' : f.type === 'zip' ? '실습파일' : f.label}
-                    </a>
-                  );
-                })}
-              </span>
+                  <span className="text-xs font-bold text-slate-500 tabular-nums">{l.date}</span>
+                </div>
+
+                <h3 className="mt-4 text-base font-bold text-slate-900">{l.title}</h3>
+                {l.subtitle && <p className="mt-0.5 text-sm text-blue-700 font-bold">{l.subtitle}</p>}
+                <p className="mt-1 text-xs text-slate-500">{[l.audience, l.duration].filter(Boolean).join(' · ')}</p>
+                {l.summary && <p className="mt-3 text-sm text-slate-600 leading-relaxed flex-1">{l.summary}</p>}
+
+                {l.tags && l.tags.length > 0 && (
+                  <p className="mt-3 flex flex-wrap gap-1.5">
+                    {l.tags.map((t) => (
+                      <span key={t} className="px-2 py-0.5 rounded-full bg-slate-100 text-xs text-slate-600">{t}</span>
+                    ))}
+                  </p>
+                )}
+
+                <p className="mt-4 pt-4 border-t border-slate-100 flex flex-wrap gap-1.5">
+                  {l.files.map((f) => {
+                    const Icon = FILE_ICON[f.type] ?? Link2;
+                    return (
+                      <a key={f.href} href={HUB + f.href} target="_blank" rel="noopener noreferrer"
+                        {...(f.download ? { download: f.download } : {})}
+                        className={`inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-bold whitespace-nowrap transition-colors ${
+                          f.type === 'slides'
+                            ? 'bg-slate-900 hover:bg-slate-800 text-white'
+                            : 'border border-slate-300 text-slate-700 hover:border-blue-600 hover:text-blue-700'
+                        }`}>
+                        <Icon className="w-3.5 h-3.5" aria-hidden="true" />
+                        {f.type === 'slides' ? '강의안' : f.type === 'pdf' ? 'PDF' : f.type === 'zip' ? '실습파일' : f.label}
+                      </a>
+                    );
+                  })}
+                </p>
+              </article>
             </li>
           ))}
         </ul>
