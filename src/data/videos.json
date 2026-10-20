@@ -3,13 +3,17 @@
     "id": "NG6j5H4qpbI",
     "title": "데이터 도구실",
     "kind": "홍보영상",
-    "desc": "교육데이터 허브 「데이터 도구실」 소개 — 교육청 배포 도구와 교직원 제작 도구를 한곳에서"
+    "desc": "교육데이터 허브 「데이터 도구실」 소개 — 교육청 배포 도구와 교직원 제작 도구를 한곳에서",
+    "link": "https://www.jbe.go.kr/board/view.jbe?boardId=BBS_0000683&menuCd=DOM_000000106011002002&paging=ok&startPage=1&searchOperation=AND&dataSid=1165417",
+    "linkLabel": "데이터 도구실 바로가기"
   },
   {
     "id": "IDRJ02P04xw",
     "title": "JB업무ON",
     "kind": "프로그램",
-    "desc": "파일명 정리·엑셀 병합·PDF 통합 등 반복 업무를 한 번에 처리하는 업무 자동화 프로그램"
+    "desc": "파일명 정리·엑셀 병합·PDF 통합 등 반복 업무를 한 번에 처리하는 업무 자동화 프로그램",
+    "link": "https://www.jbe.go.kr/board/view.jbe?boardId=BBS_0000649&menuCd=DOM_000000106011002001&paging=ok&startPage=1&searchOperation=AND&dataSid=1162415",
+    "linkLabel": "프로그램 받기"
   },
   {
     "id": "CiR2MdkCI7w",
@@ -21,6 +25,8 @@
     "id": "9HIg_fPhAoI",
     "title": "학교운영위원회 서식 자동작성기",
     "kind": "프로그램",
-    "desc": "학교운영위원회 운영에 필요한 서식을 자동으로 작성하는 프로그램"
+    "desc": "학교운영위원회 운영에 필요한 서식을 자동으로 작성하는 프로그램",
+    "link": "https://www.jbe.go.kr/board/view.jbe?boardId=BBS_0000649&menuCd=DOM_000000106011002001&paging=ok&startPage=1&searchOperation=AND&dataSid=1165635",
+    "linkLabel": "프로그램 받기"
   }
 ]

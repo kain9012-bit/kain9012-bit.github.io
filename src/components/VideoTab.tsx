@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { ExternalLink, Play } from 'lucide-react';
+import { Download, ExternalLink, Play } from 'lucide-react';
 import videos from '../data/videos.json';
 import { Badge, SectionTitle } from './Ui';
 
-interface Video { id: string; title: string; kind: string; desc: string }
+interface Video { id: string; title: string; kind: string; desc: string; link?: string; linkLabel?: string }
 const list = videos as Video[];
 
 /** 썸네일을 누르면 그 자리에서 유튜브 재생기로 바뀐다. 처음부터 재생기를 띄우지 않아 페이지가 가볍다. */
@@ -45,18 +45,28 @@ export const VideoTab: React.FC = () => {
                   <Badge tone={v.kind === '홍보영상' ? 'blue' : 'slate'}>{v.kind}</Badge>
                 </div>
                 <p className="mt-1.5 text-sm text-slate-600 leading-relaxed flex-1">{v.desc}</p>
-                <a href={`https://youtu.be/${v.id}`} target="_blank" rel="noopener noreferrer"
-                  className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-slate-500 hover:text-blue-700">
-                  유튜브에서 보기 <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
-                </a>
+                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                  {v.link ? (
+                    <a href={v.link} target="_blank" rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold">
+                      {v.linkLabel?.includes('바로가기')
+                        ? <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
+                        : <Download className="w-3.5 h-3.5" aria-hidden="true" />}
+                      {v.linkLabel ?? '프로그램 받기'}
+                    </a>
+                  ) : (
+                    <span className="text-xs font-bold text-slate-400">게시 준비 중</span>
+                  )}
+                  <a href={`https://youtu.be/${v.id}`} target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs font-bold text-slate-500 hover:text-blue-700">
+                    유튜브 <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
+                  </a>
+                </div>
               </div>
             </article>
           </li>
         ))}
       </ul>
-      <p className="text-xs text-slate-500">
-        프로그램 받는 곳: 전북교육청 홈페이지 &gt; 행정정보 &gt; 교육데이터 허브 &gt; 데이터 도구실 &gt; 교육청 배포 도구
-      </p>
     </section>
   );
 };
