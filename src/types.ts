@@ -30,3 +30,18 @@ export interface Catalog {
   categories: Category[];
   tools: Tool[];
 }
+
+export type Tab = 'tools' | 'lectures';
+
+/** 강의자료실(ai-lecture-hub)의 lectures.js 항목 */
+export interface Lecture {
+  id: string;
+  date: string;
+  title: string;
+  subtitle?: string;
+  audience?: string;
+  duration?: string;
+  tags?: string[];
+  summary?: string;
+  files: { type: 'slides' | 'pdf' | 'zip' | 'link'; label: string; href: string; download?: string }[];
+}

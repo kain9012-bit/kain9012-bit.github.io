@@ -1,8 +1,16 @@
 import React from 'react';
+import type { Tab } from '../types';
 import { LayoutGrid } from 'lucide-react';
 import { korDate } from '../lib/util';
 
-export const Header: React.FC<{ updated: string; count: number }> = ({ updated, count }) => (
+export const TABS: { id: Tab; label: string }[] = [
+  { id: 'tools', label: '업무 도구' },
+  { id: 'lectures', label: '강의자료' },
+];
+
+export const Header: React.FC<{ updated: string; count: number; tab: Tab; setTab: (t: Tab) => void }> = ({
+  updated, count, tab, setTab,
+}) => (
   <header className="bg-white sticky top-0 z-30 border-b border-slate-200">
     {/* 안내 띠 — 공식 서비스가 아니라는 것을 먼저 밝힌다 */}
     <div className="bg-slate-50 text-slate-600 border-b border-slate-200">
@@ -17,8 +25,8 @@ export const Header: React.FC<{ updated: string; count: number }> = ({ updated, 
       </div>
     </div>
 
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <a href="./" className="inline-flex items-center gap-2.5 py-3.5 group">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-x-6">
+      <a href="./" className="inline-flex items-center gap-2.5 py-3.5 group shrink-0">
         <span className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center text-white shrink-0 group-hover:bg-blue-700 transition-colors">
           <LayoutGrid className="w-5 h-5" aria-hidden="true" />
         </span>
@@ -29,6 +37,29 @@ export const Header: React.FC<{ updated: string; count: number }> = ({ updated, 
           </span>
         </span>
       </a>
+
+      <nav aria-label="주 메뉴" className="-mb-px w-full sm:w-auto">
+        <ul className="flex overflow-x-auto overflow-y-hidden no-scrollbar" role="tablist">
+          {TABS.map(({ id, label }) => {
+            const on = tab === id;
+            return (
+              <li key={id} role="presentation" className="shrink-0">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={on}
+                  onClick={() => setTab(id)}
+                  className={`px-3.5 sm:px-4 py-4 text-base font-bold whitespace-nowrap border-b-[3px] transition-colors ${
+                    on ? 'text-blue-700 border-blue-600' : 'text-slate-600 border-transparent hover:text-slate-900'
+                  }`}
+                >
+                  {label}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
     </div>
   </header>
 );
