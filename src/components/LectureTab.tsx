@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Download, ExternalLink, FileText, Link2, Presentation } from 'lucide-react';
+import { Download, FileText, Link2, Presentation } from 'lucide-react';
 import type { Lecture } from '../types';
 import { EmptyState, SectionTitle } from './Ui';
 
@@ -39,19 +39,14 @@ export const LectureTab: React.FC = () => {
 
   return (
     <section aria-labelledby="sec-lectures" className="space-y-3">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <SectionTitle id="sec-lectures" count={list?.length} desc="강의안·PDF·실습파일 · 출처 표기 후 자유롭게 활용">
-          AI 활용 강의자료
-        </SectionTitle>
-        <a href={HUB} target="_blank" rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 text-sm font-bold text-slate-600 hover:text-blue-700">
-          강의자료실 열기 <ExternalLink className="w-4 h-4" aria-hidden="true" />
-        </a>
-      </div>
+      <SectionTitle id="sec-lectures" count={list?.length}
+        desc={list ? `자료 ${list.reduce((n, l) => n + l.files.length, 0)}개 · 최근 업데이트 ${list[0]?.date ?? ''}` : undefined}>
+        AI 활용 강의자료
+      </SectionTitle>
 
       {fail ? (
         <EmptyState icon={<Presentation className="w-6 h-6" aria-hidden="true" />} title="강의 목록을 불러오지 못했습니다"
-          desc="강의자료실에 연결하지 못했습니다. 잠시 뒤 다시 시도하거나 강의자료실을 직접 여세요.">
+          desc="강의 목록에 연결하지 못했습니다. 잠시 뒤 다시 시도해 주세요.">
           <button type="button" onClick={() => setRetry((n) => n + 1)}
             className="px-3 py-2 rounded-md border border-slate-300 text-sm font-bold text-slate-700 hover:border-blue-600 hover:text-blue-700">
             다시 시도
@@ -106,6 +101,13 @@ export const LectureTab: React.FC = () => {
           ))}
         </ul>
       )}
+
+      <div role="note" className="rounded-lg border border-slate-200 bg-slate-50 p-4 space-y-1 text-sm text-slate-600">
+        <p className="font-bold text-slate-900">이용 안내</p>
+        <p>강의안은 브라우저에서 바로 열립니다. ← → 키로 넘기고, F 키로 전체화면입니다.</p>
+        <p>실습파일의 이름·연락처·학교명은 모두 가상 데이터입니다.</p>
+        <p>연수·수업에 자유롭게 활용하되, 출처(전북특별자치도교육청 박호용)를 밝혀 주세요.</p>
+      </div>
     </section>
   );
 };

@@ -19,7 +19,7 @@ const HERO: Record<Tab, { pre: string; key: string; desc: string }> = {
   },
   lectures: {
     pre: 'AI 활용', key: '강의자료',
-    desc: '연수에서 쓴 강의안·PDF·실습파일입니다. 실습파일 속 이름·연락처는 모두 가상 데이터입니다.',
+    desc: '연수에서 쓴 강의안과 실습파일을 모았습니다. 필요한 자료를 바로 열어 보거나 내려받아 쓰세요.',
   },
   videos: {
     pre: '업무경감 도구', key: '소개 영상',
