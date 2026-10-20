@@ -23,7 +23,7 @@ const HERO: Record<Tab, { pre: string; key: string; desc: string }> = {
   },
   videos: {
     pre: '업무경감 도구', key: '소개 영상',
-    desc: '설치형 프로그램과 데이터 도구실을 짧은 영상으로 소개합니다.',
+    desc: '업무경감 도구와 데이터 도구실을 짧은 영상으로 소개합니다.',
   },
 };
 
