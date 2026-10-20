@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Download, FileText, Link2, Presentation } from 'lucide-react';
+import { Download, ExternalLink, FileText, Link2, MessagesSquare, Presentation } from 'lucide-react';
 import type { Lecture } from '../types';
 import { EmptyState, SectionTitle } from './Ui';
 
 /** 강의 목록은 강의자료실 한 곳에서만 관리한다. 여기서는 그 lectures.js 를 읽어 보여줄 뿐이다. */
 export const HUB = 'https://kain9012-bit.github.io/ai-lecture-hub/';
+/** 강의 중 질문·자료 공유·투표에 쓰는 실시간 소통방 */
+const CHAT = 'https://jbedu-chat.lovable.app';
 
 declare global {
   interface Window { LECTURES?: Lecture[] }
@@ -43,6 +45,21 @@ export const LectureTab: React.FC = () => {
         desc={list ? `자료 ${list.reduce((n, l) => n + l.files.length, 0)}개 · 최근 업데이트 ${list[0]?.date ?? ''}` : undefined}>
         AI 활용 강의자료
       </SectionTitle>
+
+      {/* 강의 중에 바로 들어가야 하는 곳이라 목록보다 앞에 둔다 */}
+      <a href={CHAT} target="_blank" rel="noopener noreferrer"
+        className="group flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-blue-200 bg-blue-50 px-4 sm:px-5 py-4 hover:border-blue-600 transition-colors">
+        <span className="w-10 h-10 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0">
+          <MessagesSquare className="w-5 h-5" aria-hidden="true" />
+        </span>
+        <span className="flex-1 min-w-0">
+          <span className="block font-bold text-slate-900 group-hover:text-blue-700">강의 소통방</span>
+          <span className="block text-sm text-slate-600">강의 중 익명 질문, 자료 공유, 실시간 투표에 쓰는 채팅방입니다.</span>
+        </span>
+        <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md bg-blue-600 group-hover:bg-blue-700 text-white text-sm font-bold shrink-0">
+          들어가기 <ExternalLink className="w-4 h-4" aria-hidden="true" />
+        </span>
+      </a>
 
       {fail ? (
         <EmptyState icon={<Presentation className="w-6 h-6" aria-hidden="true" />} title="강의 목록을 불러오지 못했습니다"
