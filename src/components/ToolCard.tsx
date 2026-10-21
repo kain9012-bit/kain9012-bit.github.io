@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  BarChart3, BookOpen, Briefcase, Landmark, Code, ExternalLink, FileSearch, MousePointer, Network, Newspaper,
+  BarChart3, BookOpen, Briefcase, Gamepad2, Landmark, Code, ExternalLink, FileSearch, MousePointer, Network, Newspaper,
   Presentation, Scale, School, Search, SpellCheck, Users, Video, Wrench,
 } from 'lucide-react';
 import type { Status, Tool } from '../types';
@@ -10,7 +10,7 @@ const ICONS: Record<string, React.FC<{ className?: string }>> = {
   'book-open': BookOpen, chart: BarChart3, briefcase: Briefcase, code: Code, 'file-search': FileSearch,
   'mouse-pointer': MousePointer, network: Network, newspaper: Newspaper,
   presentation: Presentation, scale: Scale, school: School, search: Search, 'spell-check': SpellCheck,
-  users: Users, video: Video, landmark: Landmark,
+  users: Users, video: Video, landmark: Landmark, game: Gamepad2,
 };
 
 /** 카드 안의 한 줄. 아이콘 | 이름 | 설명 | 단계 | 열기 */

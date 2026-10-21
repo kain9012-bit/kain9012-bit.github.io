@@ -169,6 +169,15 @@
       "name": "행정실 첫 주",
       "desc": "신규 교육행정직이 행정실 첫 주를 미리 겪어 보는 상황 시뮬레이터",
       "url": "https://kain9012-bit.github.io/jbe-newcomer-simulator/"
+    },
+    {
+      "id": "pixel-rpg",
+      "category": "guide",
+      "status": "pilot",
+      "icon": "game",
+      "name": "교행몬 전북 에디션",
+      "desc": "교행몬 트레이너가 14개 시군 교육지원청을 돌며 업무경감 기술을 익히는 도트 게임",
+      "url": "https://jbe-pixel-rpg.vercel.app/"
     }
   ]
 }
