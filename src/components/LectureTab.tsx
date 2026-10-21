@@ -13,6 +13,20 @@ declare global {
 }
 
 let cache: Promise<Lecture[]> | null = null;
+
+const WEEK = '일월화수목금토';
+/** "2026.11.02" → 일자 표기와 완료/예정. 일자 없이 "2026.09"만 있으면 월 단위로 판단한다. */
+const when = (raw: string) => {
+  const [y, m, d] = raw.split('.').map((v) => parseInt(v, 10));
+  const now = new Date();
+  const today = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
+  if (!d) {
+    const done = y * 100 + m < Math.floor(today / 100);
+    return { label: `${y}. ${m}.`, done };
+  }
+  const wd = WEEK[new Date(y, m - 1, d).getDay()];
+  return { label: `${y}. ${m}. ${d}.(${wd})`, done: y * 10000 + m * 100 + d < today };
+};
 const loadLectures = () => {
   if (window.LECTURES) return Promise.resolve(window.LECTURES);
   if (cache) return cache;
@@ -42,7 +56,7 @@ export const LectureTab: React.FC = () => {
   return (
     <section aria-labelledby="sec-lectures" className="space-y-3">
       <SectionTitle id="sec-lectures" count={list?.length}
-        desc={list ? `자료 ${list.reduce((n, l) => n + l.files.length, 0)}개 · 최근 업데이트 ${list[0]?.date ?? ''}` : undefined}>
+        desc={list ? `강의 ${list.length}개 · 완료 ${list.filter((l) => when(l.date).done).length} · 예정 ${list.filter((l) => !when(l.date).done).length}` : undefined}>
         AI 활용 강의자료
       </SectionTitle>
 
@@ -80,7 +94,17 @@ export const LectureTab: React.FC = () => {
                   <span className="w-10 h-10 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center shrink-0">
                     <Presentation className="w-5 h-5" aria-hidden="true" />
                   </span>
-                  <span className="text-xs font-bold text-slate-500 tabular-nums">{l.date}</span>
+                  {(() => {
+                    const w = when(l.date);
+                    return (
+                      <span className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-slate-600 tabular-nums">{w.label}</span>
+                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${w.done ? 'bg-slate-100 text-slate-600 border-slate-300' : 'bg-amber-50 text-amber-800 border-amber-300'}`}>
+                          {w.done ? '완료' : '예정'}
+                        </span>
+                      </span>
+                    );
+                  })()}
                 </div>
 
                 <h3 className="mt-4 text-base font-bold text-slate-900">{l.title}</h3>
