@@ -28,5 +28,13 @@
     "desc": "학교운영위원회 운영에 필요한 서식을 자동으로 작성하는 프로그램",
     "link": "https://www.jbe.go.kr/board/view.jbe?boardId=BBS_0000649&menuCd=DOM_000000106011002001&paging=ok&startPage=1&searchOperation=AND&dataSid=1165635",
     "linkLabel": "프로그램 받기"
+  },
+  {
+    "id": "7UolMsC5To4",
+    "title": "길라잡이 웹판",
+    "kind": "웹도구",
+    "desc": "학교행정업무·교무학사 길라잡이 19편을 통합검색하고 업무 절차와 원문 PDF까지 보는 웹판",
+    "link": "https://www.jbe.go.kr/board/view.jbe?boardId=BBS_0000683&menuCd=DOM_000000106011002002&paging=ok&startPage=5&searchOperation=AND&dataSid=1175817",
+    "linkLabel": "게시글 바로가기"
   }
 ]
