@@ -89,7 +89,7 @@ export const LectureTab: React.FC = () => {
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {list.map((l) => (
             <li key={l.id} className="min-w-0">
-              <article className="flex flex-col h-full bg-white rounded-lg border border-slate-200 hover:border-blue-600 transition-colors p-5">
+              <article className={`flex flex-col h-full rounded-lg border transition-colors p-5 ${when(l.date).done ? 'bg-white border-slate-200 hover:border-blue-600' : 'bg-blue-100 border-blue-400 hover:border-blue-700'}`}>
                 <div className="flex items-start justify-between gap-3">
                   <span className="w-10 h-10 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center shrink-0">
                     <Presentation className="w-5 h-5" aria-hidden="true" />
@@ -109,7 +109,10 @@ export const LectureTab: React.FC = () => {
 
                 <h3 className="mt-4 text-base font-bold text-slate-900">{l.title}</h3>
                 {l.subtitle && <p className="mt-0.5 text-sm text-blue-700 font-bold">{l.subtitle}</p>}
-                <p className="mt-1 text-xs text-slate-500">{[l.audience, l.duration].filter(Boolean).join(' · ')}</p>
+                <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-xs">
+                  {l.audience && (<><dt className="font-bold text-slate-700">대상</dt><dd className="text-slate-700">{l.audience}</dd></>)}
+                  {l.duration && (<><dt className="font-bold text-slate-700">구성</dt><dd className="text-slate-700">{l.duration}</dd></>)}
+                </dl>
                 {l.summary && <p className="mt-3 text-sm text-slate-600 leading-relaxed flex-1">{l.summary}</p>}
 
                 {l.tags && l.tags.length > 0 && (
