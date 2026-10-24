@@ -8,6 +8,14 @@
     "linkLabel": "데이터 도구실 바로가기"
   },
   {
+    "id": "a0m-9YCzhQs",
+    "title": "동료가 만든 업무 도구",
+    "kind": "홍보영상",
+    "desc": "반복 업무 시간을 줄이려고 동료들이 직접 만든 도구를 데이터 도구실에서 소개",
+    "link": "https://www.jbe.go.kr/board/view.jbe?boardId=BBS_0000683&menuCd=DOM_000000106011002002&paging=ok&startPage=1&searchOperation=AND&dataSid=1165417",
+    "linkLabel": "데이터 도구실 바로가기"
+  },
+  {
     "id": "IDRJ02P04xw",
     "title": "JB업무ON",
     "kind": "프로그램",

@@ -10,11 +10,7 @@ const list = videos as Video[];
 export const VideoTab: React.FC = () => {
   const [playing, setPlaying] = useState<string | null>(null);
 
-  return (
-    <section aria-labelledby="sec-videos" className="space-y-3">
-      <SectionTitle id="sec-videos" count={list.length} desc="누르면 이 화면에서 재생">소개 영상</SectionTitle>
-      <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {list.map((v) => (
+  const card = (v: Video) => (
           <li key={v.id} className="min-w-0">
             <article className="flex flex-col h-full bg-white rounded-lg border border-slate-200 hover:border-blue-600 transition-colors overflow-hidden">
               <div className="relative aspect-video bg-slate-900">
@@ -65,8 +61,23 @@ export const VideoTab: React.FC = () => {
               </div>
             </article>
           </li>
-        ))}
-      </ul>
-    </section>
+  );
+
+  const groups = [
+    { id: 'promo', title: '홍보 영상', desc: '데이터 도구실을 소개하는 영상', items: list.filter((v) => v.kind === '홍보영상') },
+    { id: 'tools', title: '도구 소개 영상', desc: '누르면 이 화면에서 재생', items: list.filter((v) => v.kind !== '홍보영상') },
+  ];
+
+  return (
+    <div className="space-y-10">
+      {groups.map((g) => (
+        <section key={g.id} aria-labelledby={`sec-videos-${g.id}`} className="space-y-3">
+          <SectionTitle id={`sec-videos-${g.id}`} count={g.items.length} desc={g.desc}>{g.title}</SectionTitle>
+          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {g.items.map(card)}
+          </ul>
+        </section>
+      ))}
+    </div>
   );
 };
