@@ -7,7 +7,11 @@ export const TABS: { id: Tab; label: string }[] = [
   { id: 'tools', label: '업무 도구' },
   { id: 'lectures', label: '강의자료' },
   { id: 'videos', label: '소개 영상' },
+  { id: 'webtoon', label: 'AI웹툰' },
 ];
+/** 데이터 도구실(바깥 연결) 앞에 오는 메뉴 · 뒤에 오는 메뉴 */
+export const TABS_BEFORE = TABS.filter((t) => t.id !== 'webtoon');
+export const TABS_AFTER = TABS.filter((t) => t.id === 'webtoon');
 
 /** 바깥 연결 — 데이터 도구실 게시글 */
 export const TOOL_ROOM = 'https://www.jbe.go.kr/board/view.jbe?boardId=BBS_0000683&menuCd=DOM_000000106011002002&dataSid=1165417';
@@ -45,7 +49,7 @@ export const Header: React.FC<{ tab: Tab; setTab: (t: Tab) => void; count: numbe
     <nav className="mnav" aria-label="주메뉴">
       <div className="box">
         <ul className="no-scrollbar">
-          {TABS.map((t) => (
+          {TABS_BEFORE.map((t) => (
             <li key={t.id}>
               <button type="button" className={tab === t.id ? 'on' : ''} aria-current={tab === t.id ? 'page' : undefined}
                 onClick={() => setTab(t.id)}>{t.label}</button>
@@ -56,6 +60,12 @@ export const Header: React.FC<{ tab: Tab; setTab: (t: Tab) => void; count: numbe
               데이터 도구실 <ArrowUpRight className="w-3.5 h-3.5" aria-hidden="true" />
             </a>
           </li>
+          {TABS_AFTER.map((t) => (
+            <li key={t.id}>
+              <button type="button" className={tab === t.id ? 'on' : ''} aria-current={tab === t.id ? 'page' : undefined}
+                onClick={() => setTab(t.id)}>{t.label}</button>
+            </li>
+          ))}
         </ul>
       </div>
     </nav>

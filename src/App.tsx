@@ -9,6 +9,7 @@ import { TopButton } from './components/TopButton';
 import { ToolRow } from './components/ToolCard';
 import { LectureTab } from './components/LectureTab';
 import { VideoTab, VIDEO_GROUPS } from './components/VideoTab';
+import { WebtoonTab } from './components/WebtoonTab';
 import { Lnb, type LnbSub } from './components/Lnb';
 import { SecHead } from './components/Ui';
 
@@ -22,12 +23,13 @@ const PAGE: Record<Tab, { title: string; desc: string }> = {
   tools: { title: '업무 도구', desc: 'PoC(시제품)부터 실제 운영 중인 서비스까지 모두 담았습니다. 도구마다 지금 어느 단계인지 함께 표시합니다.' },
   lectures: { title: '강의자료', desc: '연수에서 쓴 강의안과 실습파일을 모았습니다. 필요한 자료를 바로 열어 보거나 내려받아 쓰세요.' },
   videos: { title: '소개 영상', desc: '업무경감 도구와 데이터 도구실을 짧은 영상으로 소개합니다.' },
+  webtoon: { title: 'AI웹툰', desc: 'AI와 함께 만든 업무 웹툰을 모았습니다. 누르면 새 창에서 바로 읽을 수 있습니다.' },
 };
 
 // 주소 끝 #lectures · #videos 로 그 탭을 바로 열 수 있게 한다
 const fromHash = (): Tab => {
   const h = window.location.hash.slice(1);
-  return h === 'lectures' || h === 'videos' ? h : 'tools';
+  return h === 'lectures' || h === 'videos' || h === 'webtoon' ? h : 'tools';
 };
 
 /** 왼쪽 메뉴 활성 항목 아래에 펼칠 하위 목록 */
@@ -37,6 +39,10 @@ const subsOf = (tab: Tab): LnbSub[] => {
     const list = videos as { kind: string }[];
     return VIDEO_GROUPS.map((g) => ({ id: `sec-videos-${g.id}`, label: g.title, count: list.filter(g.match).length }));
   }
+  if (tab === 'webtoon') return [
+    { id: 'sec-webtoon-list', label: '18:00' },
+    { id: 'sec-webtoon-guide', label: '안내' },
+  ];
   return [
     { id: 'sec-lectures', label: '강의 목록' },
     { id: 'sec-lecture-guide', label: '이용 안내' },
@@ -103,7 +109,7 @@ export default function App() {
                 <p>{page.desc}</p>
               </div>
 
-              {tab === 'lectures' ? <LectureTab /> : tab === 'videos' ? <VideoTab /> : (
+              {tab === 'lectures' ? <LectureTab /> : tab === 'videos' ? <VideoTab /> : tab === 'webtoon' ? <WebtoonTab /> : (
                 <>
                   <section className="hero" aria-label="업무 도구 현황">
                     <p className="big nr-title">직접 만든 업무 도구 <em>{data.tools.length}개</em>, 바로 열어 쓰세요</p>

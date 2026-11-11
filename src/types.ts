@@ -31,7 +31,7 @@ export interface Catalog {
   tools: Tool[];
 }
 
-export type Tab = 'tools' | 'lectures' | 'videos';
+export type Tab = 'tools' | 'lectures' | 'videos' | 'webtoon';
 
 /** 강의자료실(ai-lecture-hub)의 lectures.js 항목 */
 export interface Lecture {

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ArrowUpRight, ChevronRight } from 'lucide-react';
 import type { Tab } from '../types';
-import { TABS, TOOL_ROOM } from './Header';
+import { TABS_AFTER, TABS_BEFORE, TOOL_ROOM } from './Header';
 
 export interface LnbSub { id: string; label: string; count?: number }
 
@@ -36,7 +36,7 @@ export const Lnb: React.FC<{ tab: Tab; setTab: (t: Tab) => void; subs: LnbSub[] 
         <span className="s">직접 만든 업무지원 도구</span>
       </h2>
       <ul>
-        {TABS.map((t) => {
+        {TABS_BEFORE.map((t) => {
           const on = tab === t.id;
           return (
             <li key={t.id}>
@@ -68,6 +68,31 @@ export const Lnb: React.FC<{ tab: Tab; setTab: (t: Tab) => void; subs: LnbSub[] 
             <span className="sr-only">(새 창)</span>
           </a>
         </li>
+        {TABS_AFTER.map((t) => {
+          const on = tab === t.id;
+          return (
+            <li key={t.id}>
+              <button type="button" className={`lnb-item ${on ? 'on' : ''}`} aria-current={on ? 'page' : undefined}
+                onClick={() => setTab(t.id)}>
+                {t.label}
+                <ChevronRight className="w-4 h-4" aria-hidden="true" />
+              </button>
+              {on && subs.length > 0 && (
+                <ul className="lnb-sub">
+                  {subs.map((s) => (
+                    <li key={s.id}>
+                      <button type="button" className={active === s.id ? 'on' : ''} onClick={() => go(s.id)}>
+                        <span aria-hidden="true">•</span>
+                        <span className="l">{s.label}</span>
+                        {s.count !== undefined && <span className="n tabular-nums">{s.count}</span>}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          );
+        })}
       </ul>
     </aside>
   );
