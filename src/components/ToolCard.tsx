@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  BarChart3, BookOpen, Briefcase, Gamepad2, Landmark, Code, ExternalLink, FileSearch, MousePointer, Network, Newspaper,
+  ArrowUpRight, BarChart3, BookOpen, Briefcase, Gamepad2, Landmark, Code, FileSearch, MousePointer, Network, Newspaper,
   Presentation, Scale, School, Search, SpellCheck, Users, Video, Wrench,
 } from 'lucide-react';
 import type { Status, Tool } from '../types';
@@ -17,7 +17,7 @@ const ICONS: Record<string, React.FC<{ className?: string }>> = {
 export const ToolRow: React.FC<{ tool: Tool; status?: Status }> = ({ tool, status }) => {
   const Icon = ICONS[tool.icon] ?? Wrench;
   return (
-    <li className="card min-w-0">
+    <li className="tile min-w-0">
       <a href={tool.url} target="_blank" rel="noopener noreferrer" className="trow">
         <span className="ic"><Icon className="w-[22px] h-[22px]" aria-hidden="true" /></span>
 
@@ -32,7 +32,7 @@ export const ToolRow: React.FC<{ tool: Tool; status?: Status }> = ({ tool, statu
 
         {status && <Badge tone={status.tone}>{status.label}</Badge>}
         <span className="go">
-          열기 <ExternalLink className="w-4 h-4" aria-hidden="true" />
+          열기 <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
           <span className="sr-only">(새 창)</span>
         </span>
       </a>

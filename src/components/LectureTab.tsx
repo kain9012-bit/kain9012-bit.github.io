@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Download, ExternalLink, FileText, Link2, Presentation } from 'lucide-react';
 import type { Lecture } from '../types';
-import { Badge, EmptyState, Info, SecHead } from './Ui';
+import { Badge, EmptyState, SecHead } from './Ui';
 
 /** 강의 목록은 강의자료실 한 곳에서만 관리한다. 여기서는 그 lectures.js 를 읽어 보여줄 뿐이다. */
 export const HUB = 'https://kain9012-bit.github.io/ai-lecture-hub/';
@@ -58,15 +58,21 @@ export const LectureTab: React.FC = () => {
   return (
     <>
       {/* 강의 중에 바로 들어가야 하는 곳이라 목록보다 앞에 둔다 */}
-      <Info title="강의 소통방"
-        action={<a href={CHAT} target="_blank" rel="noopener noreferrer" className="btn p">
-          들어가기 <ExternalLink className="w-4 h-4" aria-hidden="true" /></a>}>
-        <p>강의 중 익명 질문, 자료 공유, 실시간 투표에 쓰는 채팅방입니다.</p>
-      </Info>
+      <section className="hero" aria-label="강의 소통방">
+        <p className="big nr-title">
+          {list ? <>강의 <em>{list.length}개</em>, 예정 <em>{list.length - done}개</em></> : '강의자료'}
+        </p>
+        <p className="note">강의 중 익명 질문, 자료 공유, 실시간 투표는 강의 소통방에서 합니다.</p>
+        <div className="row">
+          <a href={CHAT} target="_blank" rel="noopener noreferrer" className="go">
+            강의 소통방 들어가기 <ExternalLink className="w-4 h-4" aria-hidden="true" />
+          </a>
+        </div>
+      </section>
 
       <section id="sec-lectures" className="sec" aria-labelledby="h-lectures">
         <SecHead id="h-lectures" count={list?.length}
-          desc={list ? `완료 ${done} · 예정 ${list.length - done}` : undefined}>
+          note={list ? `완료 ${done} · 예정 ${list.length - done}` : undefined}>
           강의 목록
         </SecHead>
 
@@ -76,34 +82,34 @@ export const LectureTab: React.FC = () => {
             <button type="button" className="btn" onClick={() => setRetry((n) => n + 1)}>다시 시도</button>
           </EmptyState>
         ) : !list ? (
-          <p role="status" className="py-10 text-[15px] text-[var(--gray)]">강의 목록을 불러오는 중…</p>
+          <p role="status" className="py-10 text-[15px] text-[var(--nr-gray)]">강의 목록을 불러오는 중…</p>
         ) : (
-          <ul className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          <ul className="sec-body grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {list.map((l) => {
               const w = when(l.date);
               return (
                 <li key={l.id} className="min-w-0">
-                  <article className={`card ${w.done ? '' : 'next'} flex flex-col h-full p-6`}>
+                  <article className={`tile ${w.done ? '' : 'next'} flex flex-col h-full p-5 sm:p-6`}>
                     <div className="flex items-center justify-between gap-3">
-                      <span className="text-[15px] font-bold text-[var(--ink2)] tabular-nums">{w.label}</span>
+                      <span className="text-[15px] font-bold text-[#33363d] tabular-nums">{w.label}</span>
                       <Badge tone={w.done ? 'slate' : 'navy'}>{w.done ? '완료' : '예정'}</Badge>
                     </div>
 
-                    <h3 className="mt-3 text-[19px] font-extrabold leading-snug text-[var(--ink)]">{l.title}</h3>
-                    {l.subtitle && <p className="mt-1 text-[15px] font-bold text-[var(--blue-d)]">{l.subtitle}</p>}
+                    <h3 className="mt-3 text-[19px] font-extrabold leading-snug text-black">{l.title}</h3>
+                    {l.subtitle && <p className="mt-1 text-[15px] font-bold text-[var(--nr-p3)]">{l.subtitle}</p>}
                     <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[14px]">
-                      {l.audience && (<><dt className="font-bold text-[var(--ink2)]">대상</dt><dd className="text-[var(--sub)]">{l.audience}</dd></>)}
-                      {l.duration && (<><dt className="font-bold text-[var(--ink2)]">구성</dt><dd className="text-[var(--sub)]">{l.duration}</dd></>)}
+                      {l.audience && (<><dt className="font-bold text-[#33363d]">대상</dt><dd className="text-[var(--nr-sub)]">{l.audience}</dd></>)}
+                      {l.duration && (<><dt className="font-bold text-[#33363d]">구성</dt><dd className="text-[var(--nr-sub)]">{l.duration}</dd></>)}
                     </dl>
-                    {l.summary && <p className="mt-3 text-[15px] text-[var(--sub)] flex-1">{l.summary}</p>}
+                    {l.summary && <p className="mt-3 text-[15px] text-[var(--nr-sub)] flex-1">{l.summary}</p>}
 
-                    <p className="mt-5 pt-4 border-t border-[var(--line)] flex flex-wrap gap-2">
+                    <p className="mt-5 pt-4 border-t border-[var(--nr-line)] flex flex-wrap gap-2">
                       {l.files.map((f) => {
                         const Icon = FILE_ICON[f.type] ?? Link2;
                         return (
                           <a key={f.href} href={HUB + f.href} target="_blank" rel="noopener noreferrer"
                             {...(f.download ? { download: f.download } : {})}
-                            className={`btn sm ${f.type === 'slides' ? 'p' : ''}`}>
+                            className={`btn ${f.type === 'slides' ? 'p' : ''}`}>
                             <Icon className="w-4 h-4" aria-hidden="true" />
                             {f.type === 'slides' ? '강의안' : f.type === 'pdf' ? 'PDF' : f.type === 'zip' ? '실습파일' : f.label}
                           </a>
@@ -120,13 +126,13 @@ export const LectureTab: React.FC = () => {
 
       <section id="sec-lecture-guide" className="sec" aria-labelledby="h-lecture-guide">
         <SecHead id="h-lecture-guide">이용 안내</SecHead>
-        <Info title="강의안·실습파일 쓰는 법">
-          <ul>
+        <div className="soft sec-body">
+          <ul className="!mt-0">
             <li>강의안은 브라우저에서 바로 열림. ← → 키로 넘기기, F 키로 전체화면</li>
             <li>실습파일의 이름·연락처·학교명은 모두 가상 데이터</li>
             <li>연수·수업에 자유롭게 활용하되, 출처(전북특별자치도교육청 박호용) 표기</li>
           </ul>
-        </Info>
+        </div>
       </section>
     </>
   );

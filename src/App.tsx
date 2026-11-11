@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Home, Minus, Plus, Printer } from 'lucide-react';
+import { Check, ChevronRight, Home, Link2 } from 'lucide-react';
 import catalog from './data/tools.json';
 import videos from './data/videos.json';
 import type { Catalog, Tab } from './types';
@@ -7,10 +7,10 @@ import { Header, TABS } from './components/Header';
 import { Footer } from './components/Footer';
 import { TopButton } from './components/TopButton';
 import { ToolRow } from './components/ToolCard';
-import { LectureTab, CHAT } from './components/LectureTab';
+import { LectureTab } from './components/LectureTab';
 import { VideoTab, VIDEO_GROUPS } from './components/VideoTab';
-import { Lnb, type LnbItem } from './components/Lnb';
-import { Badge, Info, SecHead } from './components/Ui';
+import { Lnb, type LnbSub } from './components/Lnb';
+import { SecHead } from './components/Ui';
 
 const data = catalog as Catalog;
 const statusOf = Object.fromEntries(data.statuses.map((s) => [s.id, s]));
@@ -19,18 +19,9 @@ const groups = data.categories
   .filter((g) => g.tools.length > 0);
 
 const PAGE: Record<Tab, { title: string; desc: string }> = {
-  tools: {
-    title: '업무를 바꾸는 웹도구',
-    desc: 'PoC(시제품)부터 실제 운영 중인 서비스까지 모두 담았습니다. 도구마다 지금 어느 단계인지 함께 표시합니다.',
-  },
-  lectures: {
-    title: 'AI 활용 강의자료',
-    desc: '연수에서 쓴 강의안과 실습파일을 모았습니다. 필요한 자료를 바로 열어 보거나 내려받아 쓰세요.',
-  },
-  videos: {
-    title: '업무경감 도구 소개 영상',
-    desc: '업무경감 도구와 데이터 도구실을 짧은 영상으로 소개합니다.',
-  },
+  tools: { title: '업무 도구', desc: 'PoC(시제품)부터 실제 운영 중인 서비스까지 모두 담았습니다. 도구마다 지금 어느 단계인지 함께 표시합니다.' },
+  lectures: { title: '강의자료', desc: '연수에서 쓴 강의안과 실습파일을 모았습니다. 필요한 자료를 바로 열어 보거나 내려받아 쓰세요.' },
+  videos: { title: '소개 영상', desc: '업무경감 도구와 데이터 도구실을 짧은 영상으로 소개합니다.' },
 };
 
 // 주소 끝 #lectures · #videos 로 그 탭을 바로 열 수 있게 한다
@@ -39,8 +30,8 @@ const fromHash = (): Tab => {
   return h === 'lectures' || h === 'videos' ? h : 'tools';
 };
 
-/** 탭마다 왼쪽 메뉴에 놓을 항목 */
-const lnbItems = (tab: Tab): LnbItem[] => {
+/** 왼쪽 메뉴 활성 항목 아래에 펼칠 하위 목록 */
+const subsOf = (tab: Tab): LnbSub[] => {
   if (tab === 'tools') return groups.map((g) => ({ id: `sec-${g.id}`, label: g.label, count: g.tools.length }));
   if (tab === 'videos') {
     const list = videos as { kind: string }[];
@@ -49,15 +40,28 @@ const lnbItems = (tab: Tab): LnbItem[] => {
   return [
     { id: 'sec-lectures', label: '강의 목록' },
     { id: 'sec-lecture-guide', label: '이용 안내' },
-    { id: 'chat', label: '강의 소통방', href: CHAT },
   ];
 };
 
-const ZOOMS = [0.9, 1, 1.1, 1.2];
+const CopyUrl: React.FC = () => {
+  const [done, setDone] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setDone(true);
+      setTimeout(() => setDone(false), 1500);
+    } catch { /* 복사 권한이 없으면 조용히 넘어감 */ }
+  };
+  return (
+    <button type="button" className="copy" onClick={copy}>
+      {done ? <Check className="w-3.5 h-3.5" aria-hidden="true" /> : <Link2 className="w-3.5 h-3.5" aria-hidden="true" />}
+      {done ? '복사됨' : '주소 복사'}
+    </button>
+  );
+};
 
 export default function App() {
   const [tab, setTabState] = useState<Tab>(fromHash);
-  const [zoom, setZoom] = useState(1);
   useEffect(() => {
     const on = () => setTabState(fromHash());
     window.addEventListener('hashchange', on);
@@ -69,72 +73,69 @@ export default function App() {
     window.scrollTo({ top: 0 });
   };
   const page = PAGE[tab];
-  const items = useMemo(() => lnbItems(tab), [tab]);
-  const tabLabel = TABS.find((t) => t.id === tab)?.label ?? '';
-  const step = (d: number) => setZoom((z) => ZOOMS[Math.min(ZOOMS.length - 1, Math.max(0, ZOOMS.indexOf(z) + d))]);
+  const subs = useMemo(() => subsOf(tab), [tab]);
+  const label = TABS.find((t) => t.id === tab)?.label ?? '';
+  const by = (id: string) => data.tools.filter((t) => t.status === id).length;
 
   return (
-    <div className="min-h-screen flex flex-col overflow-x-clip" style={{ zoom }}>
+    <div className="min-h-screen flex flex-col">
       <a className="skip" href="#container">본문 바로가기</a>
-      <Header updated={data.updated} count={data.tools.length} tab={tab} setTab={setTab} />
+      <Header tab={tab} setTab={setTab} count={data.tools.length} updated={data.updated} />
 
-      {/* 위치 띠 */}
-      <div className="crumb">
-        <div className="inner">
-          <ol aria-label="현재 위치">
-            <li className="inline-flex items-center gap-1.5"><Home className="w-4 h-4" aria-hidden="true" /> 홈</li>
-            <li>{tabLabel}</li>
-          </ol>
-          <div className="tools">
-            <button type="button" className="round" onClick={() => step(1)} aria-label="글자 크게" title="글자 크게">
-              <Plus className="w-4 h-4" aria-hidden="true" />
-            </button>
-            <button type="button" className="round" onClick={() => step(-1)} aria-label="글자 작게" title="글자 작게">
-              <Minus className="w-4 h-4" aria-hidden="true" />
-            </button>
-            <button type="button" className="round" onClick={() => window.print()} aria-label="인쇄" title="인쇄">
-              <Printer className="w-4 h-4" aria-hidden="true" />
-            </button>
-          </div>
-        </div>
-      </div>
+      <div className="sub-wrap">
+        <div className="sub-band" aria-hidden="true" />
+        <div className="box sub">
+          <Lnb tab={tab} setTab={setTab} subs={subs} key={tab} />
 
-      <main id="container" className="flex-1">
-        <div className="inner sub">
-          <Lnb title={tabLabel} items={items} key={tab} />
-
-          <div className="content">
-            <div className="page-head">
-              <h1 className="page-title">{page.title}</h1>
-              <p className="page-desc">{page.desc}</p>
+          <main id="container" tabIndex={-1}>
+            <div className="crumb">
+              <Home className="w-4 h-4" aria-label="처음" />
+              <ChevronRight className="w-3.5 h-3.5 text-[var(--nr-gray)]" aria-hidden="true" />
+              <span>업무 개선 프로젝트</span>
+              <ChevronRight className="w-3.5 h-3.5 text-[var(--nr-gray)]" aria-hidden="true" />
+              <span className="cur">{label}</span>
+              <CopyUrl />
             </div>
 
-            {tab === 'lectures' ? <LectureTab /> : tab === 'videos' ? <VideoTab /> : (
-              <>
-                <Info title="단계 표시">
-                  <ul className="!list-none !pl-0 flex flex-wrap gap-x-6 gap-y-2 mt-2">
-                    {data.statuses.map((s) => (
-                      <li key={s.id} className="flex items-center gap-2">
-                        <Badge tone={s.tone}>{s.label}</Badge>
-                        <span>{s.desc}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </Info>
+            <div className="body">
+              <div className="page-title">
+                <h1 className="nr-title">{page.title}</h1>
+                <p>{page.desc}</p>
+              </div>
 
-                {groups.map((g) => (
-                  <section key={g.id} id={`sec-${g.id}`} className="sec" aria-labelledby={`h-${g.id}`}>
-                    <SecHead id={`h-${g.id}`} count={g.tools.length} desc={g.desc}>{g.label}</SecHead>
-                    <ul className="grid gap-3">
-                      {g.tools.map((t) => <ToolRow key={t.id} tool={t} status={statusOf[t.status]} />)}
-                    </ul>
+              {tab === 'lectures' ? <LectureTab /> : tab === 'videos' ? <VideoTab /> : (
+                <>
+                  <section className="hero" aria-label="업무 도구 현황">
+                    <p className="big nr-title">직접 만든 업무 도구 <em>{data.tools.length}개</em>, 바로 열어 쓰세요</p>
+                    <p className="note">동향·모니터링 · 점검·작성 · 업무 안내 세 갈래로 나눠 담았습니다.</p>
+                    <div className="row">
+                      {data.statuses.map((s) => (
+                        <span key={s.id} className="chip" title={s.desc}>{s.label} <b className="tabular-nums">{by(s.id)}</b></span>
+                      ))}
+                    </div>
                   </section>
-                ))}
-              </>
-            )}
-          </div>
+
+                  {groups.map((g) => (
+                    <section key={g.id} id={`sec-${g.id}`} className="sec" aria-labelledby={`h-${g.id}`}>
+                      <SecHead id={`h-${g.id}`} count={g.tools.length} note={g.desc}>{g.label}</SecHead>
+                      <ul className="sec-body grid gap-3">
+                        {g.tools.map((t) => <ToolRow key={t.id} tool={t} status={statusOf[t.status]} />)}
+                      </ul>
+                    </section>
+                  ))}
+
+                  <div className="soft mt-10">
+                    <b>단계 표시</b>
+                    <ul>
+                      {data.statuses.map((s) => <li key={s.id}>{s.label}: {s.desc}</li>)}
+                    </ul>
+                  </div>
+                </>
+              )}
+            </div>
+          </main>
         </div>
-      </main>
+      </div>
 
       <Footer />
       <TopButton />
