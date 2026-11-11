@@ -1,0 +1,13 @@
+[
+  {
+    "id": "ai-video-making",
+    "date": "2026.11",
+    "title": "AI로 강의 영상 만들기",
+    "subtitle": "편집 프로그램 없이, AI와 대화로",
+    "summary": "모션그래픽 설명영상 4편을 만들며 정리한 방법. 처음 듣는 말부터 시나리오·나레이션·강의안 삽입까지 단계별 안내.",
+    "points": ["Claude 데스크톱", "피쉬오디오(TTS)", "요청문 모음"],
+    "sections": 12,
+    "href": "guides/ai-video-making.html",
+    "thumb": "guides/ai-video-making-thumb.jpg"
+  }
+]
