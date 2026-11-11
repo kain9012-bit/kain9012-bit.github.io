@@ -27,8 +27,8 @@ const SeriesView: React.FC<{ s: Series }> = ({ s }) => {
   };
 
   return (
-    <article className="wt">
-      <section id="sec-webtoon-info" className="wt-head" aria-label={`${s.title} 작품 정보`}>
+    <article id={`sec-wt-${s.id}`} className="wt">
+      <section className="wt-head" aria-label={`${s.title} 작품 정보`}>
         <img src={s.cover} alt={`${s.title} 표지`} className="wt-cover" />
         <div className="min-w-0">
           <h2 className="wt-title">{s.title}</h2>
@@ -56,7 +56,7 @@ const SeriesView: React.FC<{ s: Series }> = ({ s }) => {
         </button>
       </div>
 
-      <section id="sec-webtoon-list" aria-label="회차 목록">
+      <section aria-label={`${s.title} 회차 목록`}>
         <div className="wt-bar">
           <span>총 <b className="tabular-nums">{s.episodes.length}</b>화</span>
           <span className="wt-sort">
@@ -80,20 +80,29 @@ const SeriesView: React.FC<{ s: Series }> = ({ s }) => {
         </ul>
       </section>
 
-      <section id="sec-webtoon-guide" className="soft mt-8">
-        <b>안내</b>
-        <ul>
-          <li>회차마다 그림이 모두 든 파일이라 처음 열 때 시간이 조금 걸림(약 20MB), 휴대폰 폭 기준 제작</li>
-          <li>콘티·각색은 사람과 Claude, 그림은 이미지 생성 AI가 맡은 작품</li>
-          <li>등장인물·기관·지명은 실제와 비슷하게 지은 가상 설정</li>
-        </ul>
-      </section>
     </article>
   );
 };
 
+/** 작품 목록 — 왼쪽 메뉴 하위 항목도 이 목록(작품 이름)으로 만든다 */
+export const WEBTOONS = list.map((s) => ({ id: `sec-wt-${s.id}`, label: s.title, count: s.episodes.length }));
+
 export const WebtoonTab: React.FC = () => (
   <div className="mt-8">
-    {list.map((s) => <SeriesView key={s.id} s={s} />)}
+    {list.map((s, i) => (
+      <React.Fragment key={s.id}>
+        {i > 0 && <hr className="my-12 border-[var(--nr-line)]" />}
+        <SeriesView s={s} />
+      </React.Fragment>
+    ))}
+
+    <div className="soft mt-10">
+      <b>안내</b>
+      <ul>
+        <li>회차마다 그림이 모두 든 파일이라 처음 열 때 시간이 조금 걸림(약 20MB), 휴대폰 폭 기준 제작</li>
+        <li>콘티·각색은 사람과 Claude, 그림은 이미지 생성 AI가 맡은 작품</li>
+        <li>등장인물·기관·지명은 실제와 비슷하게 지은 가상 설정</li>
+      </ul>
+    </div>
   </div>
 );

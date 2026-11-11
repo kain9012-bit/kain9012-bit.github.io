@@ -10,7 +10,7 @@ import { TopButton } from './components/TopButton';
 import { ToolRow } from './components/ToolCard';
 import { LectureTab } from './components/LectureTab';
 import { VideoTab, VIDEO_GROUPS } from './components/VideoTab';
-import { WebtoonTab } from './components/WebtoonTab';
+import { WebtoonTab, WEBTOONS } from './components/WebtoonTab';
 import { GuideTab } from './components/GuideTab';
 import { Lnb, type LnbSub } from './components/Lnb';
 import { SecHead } from './components/Ui';
@@ -46,11 +46,7 @@ const subsOf = (tab: Tab): LnbSub[] => {
     { id: 'sec-guides', label: '안내자료 목록', count: (guides as unknown[]).length },
     { id: 'sec-guide-help', label: '이용 안내' },
   ];
-  if (tab === 'webtoon') return [
-    { id: 'sec-webtoon-info', label: '작품 정보' },
-    { id: 'sec-webtoon-list', label: '회차 목록' },
-    { id: 'sec-webtoon-guide', label: '안내' },
-  ];
+  if (tab === 'webtoon') return WEBTOONS;
   return [
     { id: 'sec-lectures', label: '강의 목록' },
     { id: 'sec-lecture-guide', label: '이용 안내' },
