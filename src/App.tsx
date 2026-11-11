@@ -1,28 +1,34 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { Home, Minus, Plus, Printer } from 'lucide-react';
 import catalog from './data/tools.json';
+import videos from './data/videos.json';
 import type { Catalog, Tab } from './types';
-import { Header } from './components/Header';
+import { Header, TABS } from './components/Header';
 import { Footer } from './components/Footer';
 import { TopButton } from './components/TopButton';
 import { ToolRow } from './components/ToolCard';
-import { LectureTab } from './components/LectureTab';
-import { VideoTab } from './components/VideoTab';
-import { Badge, SectionTitle } from './components/Ui';
+import { LectureTab, CHAT } from './components/LectureTab';
+import { VideoTab, VIDEO_GROUPS } from './components/VideoTab';
+import { Lnb, type LnbItem } from './components/Lnb';
+import { Badge, Info, SecHead } from './components/Ui';
 
 const data = catalog as Catalog;
 const statusOf = Object.fromEntries(data.statuses.map((s) => [s.id, s]));
+const groups = data.categories
+  .map((c) => ({ ...c, tools: data.tools.filter((t) => t.category === c.id) }))
+  .filter((g) => g.tools.length > 0);
 
-const HERO: Record<Tab, { pre: string; key: string; desc: string }> = {
+const PAGE: Record<Tab, { title: string; desc: string }> = {
   tools: {
-    pre: '업무를 바꾸는', key: '웹도구',
+    title: '업무를 바꾸는 웹도구',
     desc: 'PoC(시제품)부터 실제 운영 중인 서비스까지 모두 담았습니다. 도구마다 지금 어느 단계인지 함께 표시합니다.',
   },
   lectures: {
-    pre: 'AI 활용', key: '강의자료',
+    title: 'AI 활용 강의자료',
     desc: '연수에서 쓴 강의안과 실습파일을 모았습니다. 필요한 자료를 바로 열어 보거나 내려받아 쓰세요.',
   },
   videos: {
-    pre: '업무경감 도구', key: '소개 영상',
+    title: '업무경감 도구 소개 영상',
     desc: '업무경감 도구와 데이터 도구실을 짧은 영상으로 소개합니다.',
   },
 };
@@ -33,8 +39,25 @@ const fromHash = (): Tab => {
   return h === 'lectures' || h === 'videos' ? h : 'tools';
 };
 
+/** 탭마다 왼쪽 메뉴에 놓을 항목 */
+const lnbItems = (tab: Tab): LnbItem[] => {
+  if (tab === 'tools') return groups.map((g) => ({ id: `sec-${g.id}`, label: g.label, count: g.tools.length }));
+  if (tab === 'videos') {
+    const list = videos as { kind: string }[];
+    return VIDEO_GROUPS.map((g) => ({ id: `sec-videos-${g.id}`, label: g.title, count: list.filter(g.match).length }));
+  }
+  return [
+    { id: 'sec-lectures', label: '강의 목록' },
+    { id: 'sec-lecture-guide', label: '이용 안내' },
+    { id: 'chat', label: '강의 소통방', href: CHAT },
+  ];
+};
+
+const ZOOMS = [0.9, 1, 1.1, 1.2];
+
 export default function App() {
   const [tab, setTabState] = useState<Tab>(fromHash);
+  const [zoom, setZoom] = useState(1);
   useEffect(() => {
     const on = () => setTabState(fromHash());
     window.addEventListener('hashchange', on);
@@ -45,59 +68,71 @@ export default function App() {
     history.replaceState(null, '', t === 'tools' ? window.location.pathname : `#${t}`);
     window.scrollTo({ top: 0 });
   };
-  const hero = HERO[tab];
-  const groups = data.categories
-    .map((c) => ({ ...c, tools: data.tools.filter((t) => t.category === c.id) }))
-    .filter((g) => g.tools.length > 0);
+  const page = PAGE[tab];
+  const items = useMemo(() => lnbItems(tab), [tab]);
+  const tabLabel = TABS.find((t) => t.id === tab)?.label ?? '';
+  const step = (d: number) => setZoom((z) => ZOOMS[Math.min(ZOOMS.length - 1, Math.max(0, ZOOMS.indexOf(z) + d))]);
 
   return (
-    <div
-      className="min-h-screen overflow-x-clip bg-white text-slate-800 font-sans antialiased
-                 flex flex-col selection:bg-blue-600 selection:text-white"
-    >
-      <a className="krds-skip" href="#container">본문 바로가기</a>
+    <div className="min-h-screen flex flex-col overflow-x-clip" style={{ zoom }}>
+      <a className="skip" href="#container">본문 바로가기</a>
       <Header updated={data.updated} count={data.tools.length} tab={tab} setTab={setTab} />
 
-      <main id="container" className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <section
-          className="relative left-1/2 w-screen -translate-x-1/2 -mt-6 bg-blue-50 border-b border-blue-100"
-          aria-labelledby="hero-title"
-        >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-9 sm:py-12 space-y-2">
-            <h1 id="hero-title" className="text-3xl sm:text-[2.5rem] font-bold text-slate-900 leading-tight">
-              {hero.pre} <span className="text-blue-700">{hero.key}</span>
-            </h1>
-            <p className="text-base text-slate-600">{hero.desc}</p>
+      {/* 위치 띠 */}
+      <div className="crumb">
+        <div className="inner">
+          <ol aria-label="현재 위치">
+            <li className="inline-flex items-center gap-1.5"><Home className="w-4 h-4" aria-hidden="true" /> 홈</li>
+            <li>{tabLabel}</li>
+          </ol>
+          <div className="tools">
+            <button type="button" className="round" onClick={() => step(1)} aria-label="글자 크게" title="글자 크게">
+              <Plus className="w-4 h-4" aria-hidden="true" />
+            </button>
+            <button type="button" className="round" onClick={() => step(-1)} aria-label="글자 작게" title="글자 작게">
+              <Minus className="w-4 h-4" aria-hidden="true" />
+            </button>
+            <button type="button" className="round" onClick={() => window.print()} aria-label="인쇄" title="인쇄">
+              <Printer className="w-4 h-4" aria-hidden="true" />
+            </button>
           </div>
-        </section>
+        </div>
+      </div>
 
-        <div className="mt-8 space-y-10">
-          {tab === 'lectures' ? <LectureTab /> : tab === 'videos' ? <VideoTab /> : (
-            <>
-          {/* 단계 뜻풀이 */}
-          <dl className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-slate-500">
-            {data.statuses.map((s) => (
-              <div key={s.id} className="flex items-center gap-1.5">
-                <dt><Badge tone={s.tone}>{s.label}</Badge></dt>
-                <dd>{s.desc}</dd>
-              </div>
-            ))}
-          </dl>
+      <main id="container" className="flex-1">
+        <div className="inner sub">
+          <Lnb title={tabLabel} items={items} key={tab} />
 
-          {groups.map((g) => (
-            <section key={g.id} aria-labelledby={`sec-${g.id}`} className="space-y-3">
-              <SectionTitle id={`sec-${g.id}`} count={g.tools.length} desc={g.desc}>
-                {g.label}
-              </SectionTitle>
-              <ul className="bg-white rounded-lg border border-slate-200 divide-y divide-slate-200 overflow-hidden">
-                {g.tools.map((t) => (
-                  <ToolRow key={t.id} tool={t} status={statusOf[t.status]} />
+          <div className="content">
+            <div className="page-head">
+              <h1 className="page-title">{page.title}</h1>
+              <p className="page-desc">{page.desc}</p>
+            </div>
+
+            {tab === 'lectures' ? <LectureTab /> : tab === 'videos' ? <VideoTab /> : (
+              <>
+                <Info title="단계 표시">
+                  <ul className="!list-none !pl-0 flex flex-wrap gap-x-6 gap-y-2 mt-2">
+                    {data.statuses.map((s) => (
+                      <li key={s.id} className="flex items-center gap-2">
+                        <Badge tone={s.tone}>{s.label}</Badge>
+                        <span>{s.desc}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </Info>
+
+                {groups.map((g) => (
+                  <section key={g.id} id={`sec-${g.id}`} className="sec" aria-labelledby={`h-${g.id}`}>
+                    <SecHead id={`h-${g.id}`} count={g.tools.length} desc={g.desc}>{g.label}</SecHead>
+                    <ul className="grid gap-3">
+                      {g.tools.map((t) => <ToolRow key={t.id} tool={t} status={statusOf[t.status]} />)}
+                    </ul>
+                  </section>
                 ))}
-              </ul>
-            </section>
-          ))}
-            </>
-          )}
+              </>
+            )}
+          </div>
         </div>
       </main>
 
