@@ -1,4 +1,4 @@
-/* 웹툰 회차 보기 화면 — 위 고정 막대(목록·이전화·다음화), 아래로 내리면 숨고 올리면 나타남,
+/* 웹툰 회차 보기 화면 — 위 고정 막대(목록·이전화·다음화), 넘기면 숨고 그림을 누르면 나타남,
  * 오른쪽 아래 맨 위·맨 아래 둥근 버튼, 회차 끝 안내 상자.
  * 회차 HTML 끝에 <script src="viewer.js" data-series=".." data-ep=".." data-list=".." data-prev=".." data-next=".."></script> 로 붙인다. */
 (function () {
@@ -111,13 +111,11 @@
   bt[0].onclick = function () { window.scrollTo({ top: 0, behavior: 'smooth' }); };
   bt[1].onclick = function () { window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' }); };
 
-  // 내리면 숨기고, 올리거나 맨 위·맨 아래에 닿으면 보이기. 그림을 누르면 막대를 껐다 켰다
+  // 처음엔 보이고, 위아래로 넘기면 숨김. 다시 보려면 그림을 눌러야 함(스크롤로는 안 나옴)
   var last = window.scrollY;
   window.addEventListener('scroll', function () {
     var y = window.scrollY;
-    var atEnd = y + window.innerHeight >= document.documentElement.scrollHeight - 40;
-    if (y < 60 || atEnd || y < last - 4) bar.classList.remove('hide');
-    else if (y > last + 4) bar.classList.add('hide');
+    if (Math.abs(y - last) > 4) bar.classList.add('hide');
     last = y;
   }, { passive: true });
   if (strip) strip.addEventListener('click', function (e) {
