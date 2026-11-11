@@ -201,3 +201,41 @@ button:focus:not(:focus-visible), a:focus:not(:focus-visible) { outline: none; }
   .hd, .lnb, .crumb, .ft, .totop, .mnav { display: none !important; }
   .sub-band { display: none; }
 }
+
+/* ---------- AI웹툰 — 웹툰 플랫폼 작품 홈 배치(표지 + 정보 + 첫 화 보기 + 회차 목록) ---------- */
+.wt-head { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 24px; align-items: start; }
+.wt-cover { width: 200px; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 6px; background: #0f1424; }
+.wt-title { margin: 0; font-size: 24px; font-weight: 800; color: #000; line-height: 1.3; }
+.wt-credit { margin: 6px 0 0; font-size: 15px; color: #33363d; }
+.wt-credit b { font-weight: 700; }
+.wt-credit .sep { margin: 0 8px; color: #cdd1d5; }
+.wt-credit .muted { color: var(--nr-gray); }
+.wt-syn { margin: 14px 0 0; font-size: 15px; line-height: 1.7; color: #1e2124; }
+.wt-tags { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.wt-tags li { padding: 5px 12px; border-radius: 4px; background: #f2f3f5; font-size: 14px; color: #464c53; }
+.wt-actions { margin-top: 22px; display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 8px; }
+.wt-first, .wt-share { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 52px; border-radius: 4px; font: inherit; font-size: 16px; font-weight: 700; text-decoration: none; cursor: pointer; }
+.wt-first { background: var(--nr-p3); color: #fff; }
+.wt-first:hover { background: var(--nr-p2); }
+.wt-share { background: #f7f8fa; border: 1px solid var(--nr-line); color: #1e2124; }
+.wt-share:hover { border-color: var(--nr-p3); color: var(--nr-p3); }
+.wt-bar { margin-top: 28px; padding-bottom: 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--nr-line); font-size: 15px; color: #464c53; }
+.wt-sort { display: inline-flex; gap: 8px; align-items: center; color: #cdd1d5; }
+.wt-sort button { border: 0; background: none; padding: 0; font: inherit; font-size: 14px; color: var(--nr-gray); cursor: pointer; }
+.wt-sort button.on { color: #000; font-weight: 700; }
+.wt-eps { list-style: none; margin: 0; padding: 0; }
+.wt-eps li { border-bottom: 1px solid var(--nr-line); }
+.wt-eps a { display: flex; align-items: center; gap: 16px; padding: 10px 0; text-decoration: none; color: inherit; }
+.wt-eps a:hover { background: var(--nr-bg); }
+.wt-eps img { width: 106px; height: 60px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
+.wt-eps .t { display: block; font-size: 16px; font-weight: 600; color: #000; }
+.wt-eps a:hover .t { color: var(--nr-p3); }
+.wt-eps .m { display: block; margin-top: 2px; font-size: 13px; color: var(--nr-gray); }
+@media (max-width: 639.98px) {
+  .wt-head { grid-template-columns: 110px minmax(0, 1fr); gap: 14px; }
+  .wt-cover { width: 110px; }
+  .wt-title { font-size: 20px; }
+  .wt-credit .sep, .wt-credit .muted { display: none; }
+  .wt-syn, .wt-tags { grid-column: 1 / -1; }
+  .wt-actions { grid-template-columns: 1fr 1fr; }
+}

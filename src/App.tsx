@@ -40,7 +40,8 @@ const subsOf = (tab: Tab): LnbSub[] => {
     return VIDEO_GROUPS.map((g) => ({ id: `sec-videos-${g.id}`, label: g.title, count: list.filter(g.match).length }));
   }
   if (tab === 'webtoon') return [
-    { id: 'sec-webtoon-list', label: '18:00' },
+    { id: 'sec-webtoon-info', label: '작품 정보' },
+    { id: 'sec-webtoon-list', label: '회차 목록' },
     { id: 'sec-webtoon-guide', label: '안내' },
   ];
   return [
