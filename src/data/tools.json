@@ -163,7 +163,7 @@
     },
     {
       "id": "newcomer",
-      "category": "guide",
+      "category": "game",
       "status": "pilot",
       "icon": "briefcase",
       "name": "행정실 첫 주",
@@ -172,7 +172,7 @@
     },
     {
       "id": "pixel-rpg",
-      "category": "guide",
+      "category": "game",
       "status": "pilot",
       "icon": "game",
       "name": "교행몬 전북 에디션",

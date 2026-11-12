@@ -9,10 +9,12 @@ export const TABS: { id: Tab; label: string }[] = [
   { id: 'guides', label: 'AI 활용 안내' },
   { id: 'videos', label: '소개 영상' },
   { id: 'webtoon', label: 'AI웹툰' },
+  { id: 'games', label: 'AI게임' },
 ];
 /** 데이터 도구실(바깥 연결) 앞에 오는 메뉴 · 뒤에 오는 메뉴 */
-export const TABS_BEFORE = TABS.filter((t) => t.id !== 'webtoon');
-export const TABS_AFTER = TABS.filter((t) => t.id === 'webtoon');
+const AFTER: Tab[] = ['webtoon', 'games'];
+export const TABS_BEFORE = TABS.filter((t) => !AFTER.includes(t.id));
+export const TABS_AFTER = TABS.filter((t) => AFTER.includes(t.id));
 
 /** 바깥 연결 — 데이터 도구실 게시글 */
 export const TOOL_ROOM = 'https://www.jbe.go.kr/board/view.jbe?boardId=BBS_0000683&menuCd=DOM_000000106011002002&dataSid=1165417';

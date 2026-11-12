@@ -17,8 +17,11 @@ import { SecHead } from './components/Ui';
 
 const data = catalog as Catalog;
 const statusOf = Object.fromEntries(data.statuses.map((s) => [s.id, s]));
+// AI게임은 따로 탭을 둔다
+const games = data.tools.filter((t) => t.category === 'game');
+const workTools = data.tools.filter((t) => t.category !== 'game');
 const groups = data.categories
-  .map((c) => ({ ...c, tools: data.tools.filter((t) => t.category === c.id) }))
+  .map((c) => ({ ...c, tools: workTools.filter((t) => t.category === c.id) }))
   .filter((g) => g.tools.length > 0);
 
 const PAGE: Record<Tab, { title: string; desc: string }> = {
@@ -26,13 +29,14 @@ const PAGE: Record<Tab, { title: string; desc: string }> = {
   lectures: { title: '강의자료', desc: '연수에서 쓴 강의안과 실습파일을 모았습니다. 필요한 자료를 바로 열어 보거나 내려받아 쓰세요.' },
   guides: { title: 'AI 활용 안내', desc: '강의안은 아니지만 교직원이 혼자 보고 따라 할 수 있는 AI 활용 방법 안내자료를 모았습니다.' },
   videos: { title: '소개 영상', desc: '업무경감 도구와 데이터 도구실을 짧은 영상으로 소개합니다.' },
+  games: { title: 'AI게임', desc: '업무를 게임처럼 미리 겪어 보고 익히도록 AI와 함께 만든 게임을 모았습니다.' },
   webtoon: { title: 'AI웹툰', desc: 'AI와 함께 만든 업무 웹툰을 모았습니다. 누르면 새 창에서 바로 읽을 수 있습니다.' },
 };
 
 // 주소 끝 #lectures · #videos 로 그 탭을 바로 열 수 있게 한다
 const fromHash = (): Tab => {
   const h = window.location.hash.slice(1);
-  return h === 'lectures' || h === 'guides' || h === 'videos' || h === 'webtoon' ? h : 'tools';
+  return h === 'lectures' || h === 'guides' || h === 'videos' || h === 'webtoon' || h === 'games' ? h : 'tools';
 };
 
 /** 왼쪽 메뉴 활성 항목 아래에 펼칠 하위 목록 */
@@ -47,6 +51,7 @@ const subsOf = (tab: Tab): LnbSub[] => {
     { id: 'sec-guide-help', label: '이용 안내' },
   ];
   if (tab === 'webtoon') return WEBTOONS;
+  if (tab === 'games') return [{ id: 'sec-games', label: '게임 목록', count: games.length }];
   return [
     { id: 'sec-lectures', label: '강의 목록' },
     { id: 'sec-lecture-guide', label: '이용 안내' },
@@ -85,12 +90,12 @@ export default function App() {
   const page = PAGE[tab];
   const subs = useMemo(() => subsOf(tab), [tab]);
   const label = TABS.find((t) => t.id === tab)?.label ?? '';
-  const by = (id: string) => data.tools.filter((t) => t.status === id).length;
+  const by = (id: string) => workTools.filter((t) => t.status === id).length;
 
   return (
     <div className="min-h-screen flex flex-col">
       <a className="skip" href="#container">본문 바로가기</a>
-      <Header tab={tab} setTab={setTab} count={data.tools.length} updated={data.updated} />
+      <Header tab={tab} setTab={setTab} count={workTools.length} updated={data.updated} />
 
       <div className="sub-wrap">
         <div className="sub-band" aria-hidden="true" />
@@ -113,10 +118,23 @@ export default function App() {
                 <p>{page.desc}</p>
               </div>
 
-              {tab === 'lectures' ? <LectureTab /> : tab === 'guides' ? <GuideTab /> : tab === 'videos' ? <VideoTab /> : tab === 'webtoon' ? <WebtoonTab /> : (
+              {tab === 'lectures' ? <LectureTab /> : tab === 'guides' ? <GuideTab /> : tab === 'videos' ? <VideoTab /> : tab === 'webtoon' ? <WebtoonTab /> : tab === 'games' ? (
+                <>
+                  <section className="hero" aria-label="AI게임 현황">
+                    <p className="big nr-title">AI와 함께 만든 업무 게임 <em>{games.length}개</em></p>
+                    <p className="note">놀이처럼 해 보며 업무 흐름을 익히는 게임. 누르면 새 창에서 바로 시작합니다.</p>
+                  </section>
+                  <section id="sec-games" className="sec" aria-labelledby="h-games">
+                    <SecHead id="h-games" count={games.length}>게임 목록</SecHead>
+                    <ul className="sec-body grid gap-3">
+                      {games.map((t) => <ToolRow key={t.id} tool={t} status={statusOf[t.status]} />)}
+                    </ul>
+                  </section>
+                </>
+              ) : (
                 <>
                   <section className="hero" aria-label="업무 도구 현황">
-                    <p className="big nr-title">직접 만든 업무 도구 <em>{data.tools.length}개</em>, 바로 열어 쓰세요</p>
+                    <p className="big nr-title">직접 만든 업무 도구 <em>{workTools.length}개</em>, 바로 열어 쓰세요</p>
                     <p className="note">동향·모니터링 · 점검·작성 · 업무 안내 세 갈래로 나눠 담았습니다.</p>
                     <div className="row">
                       {data.statuses.map((s) => (
