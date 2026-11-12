@@ -238,3 +238,15 @@ button:focus:not(:focus-visible), a:focus:not(:focus-visible) { outline: none; }
   .wt-syn, .wt-tags { grid-column: 1 / -1; }
   .wt-actions { grid-template-columns: 1fr 1fr; }
 }
+
+/* 좁은 화면 하위 메뉴(AI 콘텐츠) */
+.subtabs { display: flex; gap: 8px; margin-bottom: 24px; }
+.subtabs button { flex: 1; height: 44px; border-radius: 8px; border: 1px solid var(--nr-line); background: #fff; font: inherit; font-size: 15px; font-weight: 700; color: var(--nr-text); cursor: pointer; }
+.subtabs button span { color: var(--nr-gray); font-weight: 600; margin-left: 2px; }
+.subtabs button.on { background: var(--nr-p2); border-color: var(--nr-p2); color: #fff; }
+.subtabs button.on span { color: #ffd85c; }
+@media (min-width: 1024px) { .subtabs { display: none; } }
+
+/* 위치 표시 줄: 낱말 중간 줄바꿈 막기, 좁은 화면은 맨 앞 '업무 개선 프로젝트' 생략 */
+.crumb > span { white-space: nowrap; }
+@media (max-width: 640px) { .crumb .root { display: none; } }

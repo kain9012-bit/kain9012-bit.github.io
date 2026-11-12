@@ -1,17 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Check, ChevronRight, Home, Link2 } from 'lucide-react';
 import catalog from './data/tools.json';
-import videos from './data/videos.json';
-import guides from './data/guides.json';
 import type { Catalog, Tab } from './types';
 import { Header, TABS } from './components/Header';
 import { Footer } from './components/Footer';
 import { TopButton } from './components/TopButton';
 import { ToolRow } from './components/ToolCard';
 import { LectureTab } from './components/LectureTab';
-import { VideoTab, VIDEO_GROUPS } from './components/VideoTab';
+import { VideoTab } from './components/VideoTab';
 import { WEBTOONS } from './components/WebtoonTab';
-import { ContentTab } from './components/ContentTab';
+import { ContentTab, CONTENT_SUBS, type ContentSub } from './components/ContentTab';
 import { GuideTab } from './components/GuideTab';
 import { Lnb, type LnbSub } from './components/Lnb';
 import { SecHead } from './components/Ui';
@@ -33,35 +31,19 @@ const PAGE: Record<Tab, { title: string; desc: string }> = {
   content: { title: 'AI 콘텐츠', desc: 'AI와 함께 만든 업무 웹툰과 게임을 모았습니다.' },
 };
 
-// 주소 끝 #lectures · #videos 로 그 탭을 바로 열 수 있게 한다.
-// 예전 주소 #webtoon · #games 는 AI 콘텐츠의 해당 구획으로 연다
-const OLD: Record<string, string> = { webtoon: 'sec-webtoon', games: 'sec-games' };
+// 주소 끝 #lectures · #videos 로 그 탭을 바로 연다. AI 콘텐츠는 #webtoon · #games 로 하위 화면까지 연다
+const SUBS: string[] = ['webtoon', 'games'];
 const fromHash = (): Tab => {
   const h = window.location.hash.slice(1);
-  if (h in OLD) return 'content';
+  if (SUBS.includes(h)) return 'content';
   return h === 'lectures' || h === 'guides' || h === 'videos' || h === 'content' ? h : 'tools';
 };
+const subFromHash = (): ContentSub => (window.location.hash.slice(1) === 'games' ? 'games' : 'webtoon');
 
-/** 왼쪽 메뉴 활성 항목 아래에 펼칠 하위 목록 */
-const subsOf = (tab: Tab): LnbSub[] => {
-  if (tab === 'tools') return groups.map((g) => ({ id: `sec-${g.id}`, label: g.label, count: g.tools.length }));
-  if (tab === 'videos') {
-    const list = videos as { kind: string }[];
-    return VIDEO_GROUPS.map((g) => ({ id: `sec-videos-${g.id}`, label: g.title, count: list.filter(g.match).length }));
-  }
-  if (tab === 'guides') return [
-    { id: 'sec-guides', label: '안내자료 목록', count: (guides as unknown[]).length },
-    { id: 'sec-guide-help', label: '이용 안내' },
-  ];
-  if (tab === 'content') return [
-    { id: 'sec-webtoon', label: 'AI웹툰', count: WEBTOONS.length },
-    { id: 'sec-games', label: 'AI게임', count: games.length },
-  ];
-  return [
-    { id: 'sec-lectures', label: '강의 목록' },
-    { id: 'sec-lecture-guide', label: '이용 안내' },
-  ];
-};
+/** 하위 메뉴는 AI 콘텐츠에만 둔다 */
+const subsOf = (tab: Tab): LnbSub[] => (tab === 'content'
+  ? CONTENT_SUBS.map((s) => ({ id: s.id, label: s.label, count: s.id === 'webtoon' ? WEBTOONS.length : games.length }))
+  : []);
 
 const CopyUrl: React.FC = () => {
   const [done, setDone] = useState(false);
@@ -82,22 +64,26 @@ const CopyUrl: React.FC = () => {
 
 export default function App() {
   const [tab, setTabState] = useState<Tab>(fromHash);
+  const [sub, setSubState] = useState<ContentSub>(subFromHash);
   useEffect(() => {
-    const jump = () => {
-      const sec = OLD[window.location.hash.slice(1)];
-      if (sec) setTimeout(() => document.getElementById(sec)?.scrollIntoView({ block: 'start' }), 50);
-    };
-    jump();
-    const on = () => { setTabState(fromHash()); jump(); };
+    const on = () => { setTabState(fromHash()); setSubState(subFromHash()); };
     window.addEventListener('hashchange', on);
     return () => window.removeEventListener('hashchange', on);
   }, []);
+  const setSub = (s: ContentSub) => {
+    setTabState('content');
+    setSubState(s);
+    history.replaceState(null, '', `#${s}`);
+    window.scrollTo({ top: 0 });
+  };
   const setTab = (t: Tab) => {
+    if (t === 'content') { setSub(tab === 'content' ? sub : 'webtoon'); return; }
     setTabState(t);
     history.replaceState(null, '', t === 'tools' ? window.location.pathname : `#${t}`);
     window.scrollTo({ top: 0 });
   };
-  const page = PAGE[tab];
+  const cs = CONTENT_SUBS.find((s) => s.id === sub)!;
+  const page = tab === 'content' ? { title: cs.label, desc: cs.desc } : PAGE[tab];
   const subs = useMemo(() => subsOf(tab), [tab]);
   const label = TABS.find((t) => t.id === tab)?.label ?? '';
   const by = (id: string) => workTools.filter((t) => t.status === id).length;
@@ -110,15 +96,21 @@ export default function App() {
       <div className="sub-wrap">
         <div className="sub-band" aria-hidden="true" />
         <div className="box sub">
-          <Lnb tab={tab} setTab={setTab} subs={subs} key={tab} />
+          <Lnb tab={tab} setTab={setTab} subs={subs} sub={sub} setSub={(s) => setSub(s as ContentSub)} />
 
           <main id="container" tabIndex={-1}>
             <div className="crumb">
               <Home className="w-4 h-4" aria-label="처음" />
               <ChevronRight className="w-3.5 h-3.5 text-[var(--nr-gray)]" aria-hidden="true" />
-              <span>업무 개선 프로젝트</span>
-              <ChevronRight className="w-3.5 h-3.5 text-[var(--nr-gray)]" aria-hidden="true" />
-              <span className="cur">{label}</span>
+              <span className="root">업무 개선 프로젝트</span>
+              <ChevronRight className="root w-3.5 h-3.5 text-[var(--nr-gray)]" aria-hidden="true" />
+              {tab === 'content' ? (
+                <>
+                  <span>{label}</span>
+                  <ChevronRight className="w-3.5 h-3.5 text-[var(--nr-gray)]" aria-hidden="true" />
+                  <span className="cur">{cs.label}</span>
+                </>
+              ) : <span className="cur">{label}</span>}
               <CopyUrl />
             </div>
 
@@ -128,7 +120,7 @@ export default function App() {
                 <p>{page.desc}</p>
               </div>
 
-              {tab === 'lectures' ? <LectureTab /> : tab === 'guides' ? <GuideTab /> : tab === 'videos' ? <VideoTab /> : tab === 'content' ? <ContentTab games={games} statusOf={statusOf} /> : (
+              {tab === 'lectures' ? <LectureTab /> : tab === 'guides' ? <GuideTab /> : tab === 'videos' ? <VideoTab /> : tab === 'content' ? <ContentTab sub={sub} setSub={setSub} games={games} statusOf={statusOf} /> : (
                 <>
                   <section className="hero" aria-label="업무 도구 현황">
                     <p className="big nr-title">직접 만든 업무 도구 <em>{workTools.length}개</em>, 바로 열어 쓰세요</p>
