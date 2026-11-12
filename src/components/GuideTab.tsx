@@ -13,7 +13,7 @@ const ym = (d: string) => { const [y, m] = d.split('.'); return `${y}. ${parseIn
 /** 강의안이 아닌, 교직원이 혼자 보고 따라 하는 AI 활용 안내자료 */
 export const GuideTab: React.FC = () => (
   <>
-    <section className="hero" aria-label="AI 활용 안내 현황">
+    <section className="hero" aria-label="AI 활용법 현황">
       <p className="big nr-title">AI 활용 안내자료 <em>{list.length}편</em></p>
       <p className="note">연수 없이도 혼자 읽고 따라 할 수 있게 만든 자료. 새 자료가 나오면 이곳에 추가합니다.</p>
     </section>

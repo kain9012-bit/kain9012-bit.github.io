@@ -28,7 +28,7 @@ const groups = data.categories
 const PAGE: Record<Tab, { title: string; desc: string }> = {
   tools: { title: '업무 도구', desc: 'PoC(시제품)부터 실제 운영 중인 서비스까지 모두 담았습니다. 도구마다 지금 어느 단계인지 함께 표시합니다.' },
   lectures: { title: '강의자료', desc: '연수에서 쓴 강의안과 실습파일을 모았습니다. 필요한 자료를 바로 열어 보거나 내려받아 쓰세요.' },
-  guides: { title: 'AI 활용 안내', desc: '강의안은 아니지만 교직원이 혼자 보고 따라 할 수 있는 AI 활용 방법 안내자료를 모았습니다.' },
+  guides: { title: 'AI 활용법', desc: '강의안은 아니지만 교직원이 혼자 보고 따라 할 수 있는 AI 활용 방법 안내자료를 모았습니다.' },
   videos: { title: '소개 영상', desc: '업무경감 도구와 데이터 도구실을 짧은 영상으로 소개합니다.' },
   content: { title: 'AI 콘텐츠', desc: 'AI와 함께 만든 업무 웹툰과 게임을 모았습니다.' },
 };

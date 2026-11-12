@@ -7,7 +7,7 @@ export const TABS: { id: Tab; label: string }[] = [
   { id: 'tools', label: '업무 도구' },
   { id: 'videos', label: '소개 영상' },
   { id: 'lectures', label: '강의자료' },
-  { id: 'guides', label: 'AI 활용 안내' },
+  { id: 'guides', label: 'AI 활용법' },
   { id: 'content', label: 'AI 콘텐츠' },
 ];
 /** 데이터 도구실(바깥 연결) 앞에 오는 메뉴 · 뒤에 오는 메뉴 */
