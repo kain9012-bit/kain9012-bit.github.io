@@ -34,10 +34,7 @@ export const Header: React.FC<{ tab: Tab; setTab: (t: Tab) => void; count: numbe
       </div>
       <div className="hd-main">
         <a href="./" className="brand" onClick={(e) => { e.preventDefault(); setTab('tools'); }}>
-          <span className="mark" aria-hidden="true">
-            <i style={{ background: '#3480cc' }} /><i style={{ background: '#32bdb8' }} />
-            <i style={{ background: '#fecd20' }} /><i style={{ background: '#3a457f' }} />
-          </span>
+          <img className="mark" src="./favicon.svg" alt="" aria-hidden="true" />
           <span>
             <strong className="nr-title">업무 개선 프로젝트</strong>
             <small>전북특별자치도교육청 · 비공식 업무지원 도구</small>
