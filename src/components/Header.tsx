@@ -5,14 +5,14 @@ import { korDate } from '../lib/util';
 
 export const TABS: { id: Tab; label: string }[] = [
   { id: 'tools', label: '업무 도구' },
+  { id: 'videos', label: '소개 영상' },
   { id: 'lectures', label: '강의자료' },
   { id: 'guides', label: 'AI 활용 안내' },
-  { id: 'videos', label: '소개 영상' },
-  { id: 'webtoon', label: 'AI웹툰' },
-  { id: 'games', label: 'AI게임' },
+  { id: 'content', label: 'AI 콘텐츠' },
 ];
 /** 데이터 도구실(바깥 연결) 앞에 오는 메뉴 · 뒤에 오는 메뉴 */
-const AFTER: Tab[] = ['webtoon', 'games'];
+/** 데이터 도구실(바깥 연결)은 맨 끝 — 뒤에 오는 메뉴 없음 */
+const AFTER: Tab[] = [];
 export const TABS_BEFORE = TABS.filter((t) => !AFTER.includes(t.id));
 export const TABS_AFTER = TABS.filter((t) => AFTER.includes(t.id));
 

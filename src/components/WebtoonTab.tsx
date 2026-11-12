@@ -88,7 +88,7 @@ const SeriesView: React.FC<{ s: Series }> = ({ s }) => {
 export const WEBTOONS = list.map((s) => ({ id: `sec-wt-${s.id}`, label: s.title, count: s.episodes.length }));
 
 export const WebtoonTab: React.FC = () => (
-  <div className="mt-8">
+  <div>
     {list.map((s, i) => (
       <React.Fragment key={s.id}>
         {i > 0 && <hr className="my-12 border-[var(--nr-line)]" />}

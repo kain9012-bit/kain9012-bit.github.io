@@ -10,14 +10,15 @@ import { TopButton } from './components/TopButton';
 import { ToolRow } from './components/ToolCard';
 import { LectureTab } from './components/LectureTab';
 import { VideoTab, VIDEO_GROUPS } from './components/VideoTab';
-import { WebtoonTab, WEBTOONS } from './components/WebtoonTab';
+import { WEBTOONS } from './components/WebtoonTab';
+import { ContentTab } from './components/ContentTab';
 import { GuideTab } from './components/GuideTab';
 import { Lnb, type LnbSub } from './components/Lnb';
 import { SecHead } from './components/Ui';
 
 const data = catalog as Catalog;
 const statusOf = Object.fromEntries(data.statuses.map((s) => [s.id, s]));
-// AI게임은 따로 탭을 둔다
+// AI게임은 AI 콘텐츠 탭에 둔다
 const games = data.tools.filter((t) => t.category === 'game');
 const workTools = data.tools.filter((t) => t.category !== 'game');
 const groups = data.categories
@@ -29,14 +30,16 @@ const PAGE: Record<Tab, { title: string; desc: string }> = {
   lectures: { title: '강의자료', desc: '연수에서 쓴 강의안과 실습파일을 모았습니다. 필요한 자료를 바로 열어 보거나 내려받아 쓰세요.' },
   guides: { title: 'AI 활용 안내', desc: '강의안은 아니지만 교직원이 혼자 보고 따라 할 수 있는 AI 활용 방법 안내자료를 모았습니다.' },
   videos: { title: '소개 영상', desc: '업무경감 도구와 데이터 도구실을 짧은 영상으로 소개합니다.' },
-  games: { title: 'AI게임', desc: '업무를 게임처럼 미리 겪어 보고 익히도록 AI와 함께 만든 게임을 모았습니다.' },
-  webtoon: { title: 'AI웹툰', desc: 'AI와 함께 만든 업무 웹툰을 모았습니다. 누르면 새 창에서 바로 읽을 수 있습니다.' },
+  content: { title: 'AI 콘텐츠', desc: 'AI와 함께 만든 업무 웹툰과 게임을 모았습니다.' },
 };
 
-// 주소 끝 #lectures · #videos 로 그 탭을 바로 열 수 있게 한다
+// 주소 끝 #lectures · #videos 로 그 탭을 바로 열 수 있게 한다.
+// 예전 주소 #webtoon · #games 는 AI 콘텐츠의 해당 구획으로 연다
+const OLD: Record<string, string> = { webtoon: 'sec-webtoon', games: 'sec-games' };
 const fromHash = (): Tab => {
   const h = window.location.hash.slice(1);
-  return h === 'lectures' || h === 'guides' || h === 'videos' || h === 'webtoon' || h === 'games' ? h : 'tools';
+  if (h in OLD) return 'content';
+  return h === 'lectures' || h === 'guides' || h === 'videos' || h === 'content' ? h : 'tools';
 };
 
 /** 왼쪽 메뉴 활성 항목 아래에 펼칠 하위 목록 */
@@ -50,8 +53,10 @@ const subsOf = (tab: Tab): LnbSub[] => {
     { id: 'sec-guides', label: '안내자료 목록', count: (guides as unknown[]).length },
     { id: 'sec-guide-help', label: '이용 안내' },
   ];
-  if (tab === 'webtoon') return WEBTOONS;
-  if (tab === 'games') return [{ id: 'sec-games', label: '게임 목록', count: games.length }];
+  if (tab === 'content') return [
+    { id: 'sec-webtoon', label: 'AI웹툰', count: WEBTOONS.length },
+    { id: 'sec-games', label: 'AI게임', count: games.length },
+  ];
   return [
     { id: 'sec-lectures', label: '강의 목록' },
     { id: 'sec-lecture-guide', label: '이용 안내' },
@@ -78,7 +83,12 @@ const CopyUrl: React.FC = () => {
 export default function App() {
   const [tab, setTabState] = useState<Tab>(fromHash);
   useEffect(() => {
-    const on = () => setTabState(fromHash());
+    const jump = () => {
+      const sec = OLD[window.location.hash.slice(1)];
+      if (sec) setTimeout(() => document.getElementById(sec)?.scrollIntoView({ block: 'start' }), 50);
+    };
+    jump();
+    const on = () => { setTabState(fromHash()); jump(); };
     window.addEventListener('hashchange', on);
     return () => window.removeEventListener('hashchange', on);
   }, []);
@@ -118,20 +128,7 @@ export default function App() {
                 <p>{page.desc}</p>
               </div>
 
-              {tab === 'lectures' ? <LectureTab /> : tab === 'guides' ? <GuideTab /> : tab === 'videos' ? <VideoTab /> : tab === 'webtoon' ? <WebtoonTab /> : tab === 'games' ? (
-                <>
-                  <section className="hero" aria-label="AI게임 현황">
-                    <p className="big nr-title">AI와 함께 만든 업무 게임 <em>{games.length}개</em></p>
-                    <p className="note">놀이처럼 해 보며 업무 흐름을 익히는 게임. 누르면 새 창에서 바로 시작합니다.</p>
-                  </section>
-                  <section id="sec-games" className="sec" aria-labelledby="h-games">
-                    <SecHead id="h-games" count={games.length}>게임 목록</SecHead>
-                    <ul className="sec-body grid gap-3">
-                      {games.map((t) => <ToolRow key={t.id} tool={t} status={statusOf[t.status]} />)}
-                    </ul>
-                  </section>
-                </>
-              ) : (
+              {tab === 'lectures' ? <LectureTab /> : tab === 'guides' ? <GuideTab /> : tab === 'videos' ? <VideoTab /> : tab === 'content' ? <ContentTab games={games} statusOf={statusOf} /> : (
                 <>
                   <section className="hero" aria-label="업무 도구 현황">
                     <p className="big nr-title">직접 만든 업무 도구 <em>{workTools.length}개</em>, 바로 열어 쓰세요</p>

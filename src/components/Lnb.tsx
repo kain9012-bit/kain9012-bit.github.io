@@ -17,6 +17,9 @@ export const Lnb: React.FC<{ tab: Tab; setTab: (t: Tab) => void; subs: LnbSub[] 
         const el = document.getElementById(s.id);
         if (el && el.getBoundingClientRect().top < 160) cur = s.id;
       }
+      // 맨 아래까지 내려 마지막 구획이 끝까지 못 올라오면 마지막 구획을 표시
+      const end = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
+      if (end && window.scrollY > 0 && subs.length) cur = subs[subs.length - 1].id;
       setActive(cur);
     };
     on();
