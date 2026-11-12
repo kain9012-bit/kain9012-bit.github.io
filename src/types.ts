@@ -21,6 +21,8 @@ export interface Tool {
   name: string;
   desc: string;
   url: string;
+  /** AI게임 카드 표지(3:4) */
+  cover?: string;
   badge?: { label: string; tone: Tone };
 }
 

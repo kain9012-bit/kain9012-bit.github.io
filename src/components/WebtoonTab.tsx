@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BookOpenText, Check, Share2 } from 'lucide-react';
+import { BookOpenText, Check, ChevronLeft, Share2 } from 'lucide-react';
 import webtoons from '../data/webtoons.json';
 
 interface Episode { no: number; title: string; date: string; cuts: number; href: string; thumb: string }
@@ -84,25 +84,59 @@ const SeriesView: React.FC<{ s: Series }> = ({ s }) => {
   );
 };
 
-/** 작품 목록 — 왼쪽 메뉴 하위 항목도 이 목록(작품 이름)으로 만든다 */
-export const WEBTOONS = list.map((s) => ({ id: `sec-wt-${s.id}`, label: s.title, count: s.episodes.length }));
+export const WEBTOONS = list;
 
-export const WebtoonTab: React.FC = () => (
-  <div>
-    {list.map((s, i) => (
-      <React.Fragment key={s.id}>
-        {i > 0 && <hr className="my-12 border-[var(--nr-line)]" />}
-        <SeriesView s={s} />
-      </React.Fragment>
-    ))}
+/** 최근 7일 안에 새 회차가 올라왔는지 */
+const isUp = (s: Series) => {
+  const d = s.episodes.map((e) => e.date).sort().pop();
+  if (!d) return false;
+  const [y, m, dd] = d.split('.').map(Number);
+  return Date.now() - new Date(y, m - 1, dd).getTime() < 7 * 864e5;
+};
+const latestDate = (s: Series) => s.episodes.map((e) => e.date).sort().pop() ?? '';
 
-    <div className="soft mt-10">
-      <b>안내</b>
-      <ul>
-        <li>회차마다 그림이 모두 든 파일이라 처음 열 때 시간이 조금 걸림(약 20MB), 휴대폰 폭 기준 제작</li>
-        <li>콘티·각색은 사람과 Claude, 그림은 이미지 생성 AI가 맡은 작품</li>
-        <li>등장인물·기관·지명은 실제와 비슷하게 지은 가상 설정</li>
-      </ul>
-    </div>
+const Guide: React.FC = () => (
+  <div className="soft mt-10">
+    <b>안내</b>
+    <ul>
+      <li>회차마다 그림이 모두 든 파일이라 처음 열 때 시간이 조금 걸림(약 20MB), 휴대폰 폭 기준 제작</li>
+      <li>콘티·각색은 사람과 Claude, 그림은 이미지 생성 AI가 맡은 작품</li>
+      <li>등장인물·기관·지명은 실제와 비슷하게 지은 가상 설정</li>
+    </ul>
   </div>
 );
+
+/** AI웹툰 — 작품 카드 목록. 카드를 누르면 그 작품의 회차 목록 화면 */
+export const WebtoonTab: React.FC<{ series?: string; open: (id: string | null) => void }> = ({ series, open }) => {
+  const cur = list.find((s) => s.id === series);
+  if (cur) {
+    return (
+      <div>
+        <button type="button" className="back-link" onClick={() => open(null)}>
+          <ChevronLeft className="w-4 h-4" aria-hidden="true" /> 웹툰 목록
+        </button>
+        <SeriesView s={cur} />
+        <Guide />
+      </div>
+    );
+  }
+  const sorted = [...list].sort((a, b) => latestDate(b).localeCompare(latestDate(a)));
+  return (
+    <div>
+      <div className="cards-bar"><b>전체 웹툰</b> <span>총 {list.length}편 · 최근 올라온 순</span></div>
+      <ul className="cards">
+        {sorted.map((s) => (
+          <li key={s.id}>
+            <a href={`#webtoon/${s.id}`} className="card" onClick={(e) => { e.preventDefault(); open(s.id); }}>
+              <span className="cv"><img src={s.cover} alt="" loading="lazy" /></span>
+              <span className="nm">{isUp(s) && <i className="up">UP</i>}{s.title}</span>
+              <span className="by">{s.story}</span>
+              <span className="mt tabular-nums">총 {s.episodes.length}화 · {short(latestDate(s))}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <Guide />
+    </div>
+  );
+};
